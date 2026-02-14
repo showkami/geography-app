@@ -50,14 +50,26 @@ export default function ProjectionsPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        地図投影法エクスプローラー
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        球面である地球を平面の地図に変換する方法を「投影法」といいます。
-        それぞれの投影法にはメリット・デメリットがあり、用途に応じて使い分けます。
-        投影法を切り替え、ドラッグやスライダーで投影の中心を変えてみましょう。
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            mb: 1,
+            background: "linear-gradient(135deg, #0f172a, #1d4ed8)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          地図投影法エクスプローラー
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 720 }}>
+          球面である地球を平面の地図に変換する方法を「投影法」といいます。
+          それぞれの投影法にはメリット・デメリットがあり、用途に応じて使い分けます。
+          投影法を切り替え、ドラッグやスライダーで投影の中心を変えてみましょう。
+        </Typography>
+      </Box>
 
       <Grid container spacing={3}>
         {/* 左サイドバー: 投影法選択 + 回転コントロール */}

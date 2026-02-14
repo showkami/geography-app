@@ -51,13 +51,25 @@ export default function DayNightPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        昼夜の長さと地軸の傾き
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        地球の地軸は公転面に対して23.4度傾いています。この傾きによって、季節ごとに昼と夜の長さが変化します。
-        日付を変えて、地球上の昼夜の境界線がどう変わるか観察しましょう。
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            mb: 1,
+            background: "linear-gradient(135deg, #0f172a, #1d4ed8)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          昼夜の長さと地軸の傾き
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 720 }}>
+          地球の地軸は公転面に対して23.4度傾いています。この傾きによって、季節ごとに昼と夜の長さが変化します。
+          日付を変えて、地球上の昼夜の境界線がどう変わるか観察しましょう。
+        </Typography>
+      </Box>
 
       <Grid container spacing={3}>
         {/* 左カラム: 地球儀 + コントロール */}

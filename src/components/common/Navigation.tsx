@@ -22,6 +22,7 @@ import PublicIcon from "@mui/icons-material/Public";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import MapIcon from "@mui/icons-material/Map";
 import HomeIcon from "@mui/icons-material/Home";
+import CloseIcon from "@mui/icons-material/Close";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -39,51 +40,72 @@ export default function Navigation() {
 
   return (
     <>
-      <AppBar position="sticky" elevation={1}>
-        <Toolbar>
+      <AppBar position="sticky">
+        <Toolbar sx={{ px: { xs: 2, md: 3 } }}>
           {isMobile && (
             <IconButton
-              color="inherit"
               edge="start"
               onClick={() => setDrawerOpen(true)}
-              sx={{ mr: 1 }}
+              sx={{ mr: 1, color: "primary.main" }}
             >
               <MenuIcon />
             </IconButton>
           )}
-          <PublicIcon sx={{ mr: 1 }} />
-          <Typography
-            variant="h6"
+          <Box
             component={Link}
             href="/"
             sx={{
-              flexGrow: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
               textDecoration: "none",
               color: "inherit",
+              flexGrow: 1,
             }}
           >
-            GeoEdu - 地理教育
-          </Typography>
+            <PublicIcon sx={{ color: "primary.main", fontSize: 28 }} />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                background: "linear-gradient(135deg, #1d4ed8, #7c3aed)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              GeoEdu
+            </Typography>
+          </Box>
           {!isMobile && (
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {navItems.map((item) => (
-                <Button
-                  key={item.href}
-                  component={Link}
-                  href={item.href}
-                  color="inherit"
-                  variant={pathname === item.href ? "outlined" : "text"}
-                  startIcon={item.icon}
-                  sx={{
-                    borderColor:
-                      pathname === item.href
-                        ? "rgba(255,255,255,0.5)"
+            <Box sx={{ display: "flex", gap: 0.5 }}>
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Button
+                    key={item.href}
+                    component={Link}
+                    href={item.href}
+                    startIcon={item.icon}
+                    sx={{
+                      color: isActive ? "primary.main" : "text.secondary",
+                      bgcolor: isActive
+                        ? "rgba(29, 78, 216, 0.08)"
                         : "transparent",
-                  }}
-                >
-                  {item.label}
-                </Button>
-              ))}
+                      fontWeight: isActive ? 600 : 500,
+                      borderRadius: 2,
+                      px: 2,
+                      "&:hover": {
+                        bgcolor: isActive
+                          ? "rgba(29, 78, 216, 0.12)"
+                          : "rgba(0, 0, 0, 0.04)",
+                      },
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                );
+              })}
             </Box>
           )}
         </Toolbar>
@@ -93,28 +115,81 @@ export default function Navigation() {
         anchor="left"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            width: 300,
+            borderRadius: "0 16px 16px 0",
+          },
+        }}
       >
-        <Box sx={{ width: 280 }}>
-          <Box sx={{ p: 2, bgcolor: "primary.main", color: "white" }}>
-            <Typography variant="h6">GeoEdu</Typography>
-            <Typography variant="body2">地理教育ウェブアプリ</Typography>
+        <Box
+          sx={{
+            p: 3,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <PublicIcon sx={{ color: "primary.main" }} />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                background: "linear-gradient(135deg, #1d4ed8, #7c3aed)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              GeoEdu
+            </Typography>
           </Box>
-          <List>
-            {navItems.map((item) => (
-              <ListItem key={item.href} disablePadding>
+          <IconButton onClick={() => setDrawerOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <List sx={{ px: 1.5 }}>
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <ListItem key={item.href} disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton
                   component={Link}
                   href={item.href}
-                  selected={pathname === item.href}
                   onClick={() => setDrawerOpen(false)}
+                  sx={{
+                    borderRadius: 2,
+                    bgcolor: isActive
+                      ? "rgba(29, 78, 216, 0.08)"
+                      : "transparent",
+                    color: isActive ? "primary.main" : "text.primary",
+                    "&:hover": {
+                      bgcolor: isActive
+                        ? "rgba(29, 78, 216, 0.12)"
+                        : "rgba(0, 0, 0, 0.04)",
+                    },
+                  }}
                 >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.label} />
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 40,
+                      color: isActive ? "primary.main" : "text.secondary",
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontWeight: isActive ? 600 : 400,
+                    }}
+                  />
                 </ListItemButton>
               </ListItem>
-            ))}
-          </List>
-        </Box>
+            );
+          })}
+        </List>
       </Drawer>
     </>
   );
