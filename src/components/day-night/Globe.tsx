@@ -8,12 +8,14 @@ import type { Topology, Objects, GeometryCollection } from "topojson-specificati
 
 interface GlobeProps {
   dayOfYear: number;
+  hourUTC?: number;
   width?: number;
   height?: number;
 }
 
 export default function Globe({
   dayOfYear,
+  hourUTC = 12,
   width = 500,
   height = 500,
 }: GlobeProps) {
@@ -91,7 +93,7 @@ export default function Globe({
         .attr("stroke-width", 0.5);
 
       // 昼夜境界線（ターミネーター）
-      const [sunLon, sunLat] = subsolarPoint(dayOfYear);
+      const [sunLon, sunLat] = subsolarPoint(dayOfYear, hourUTC);
       const nightCircle = d3
         .geoCircle()
         .center([sunLon + 180, -sunLat])
@@ -173,7 +175,7 @@ export default function Globe({
     };
 
     renderGlobe();
-  }, [dayOfYear, width, height, loadWorldData]);
+  }, [dayOfYear, hourUTC, width, height, loadWorldData]);
 
   return (
     <svg

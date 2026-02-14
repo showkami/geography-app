@@ -14,6 +14,7 @@ import DateControls from "@/components/day-night/DateControls";
 
 export default function DayNightPage() {
   const [dayOfYear, setDayOfYear] = useState(172); // 夏至から開始
+  const [hourUTC, setHourUTC] = useState(12); // UTC正午から開始
   const [isPlaying, setIsPlaying] = useState(false);
   const animRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -71,7 +72,7 @@ export default function DayNightPage() {
             <Box
               sx={{ display: "flex", justifyContent: "center" }}
             >
-              <Globe dayOfYear={dayOfYear} width={450} height={450} />
+              <Globe dayOfYear={dayOfYear} hourUTC={hourUTC} width={450} height={450} />
             </Box>
             <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -101,6 +102,8 @@ export default function DayNightPage() {
             <DateControls
               dayOfYear={dayOfYear}
               onDayChange={setDayOfYear}
+              hourUTC={hourUTC}
+              onHourChange={setHourUTC}
               isPlaying={isPlaying}
               onPlayToggle={handlePlayToggle}
               onReset={handleReset}
