@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useCallback } from "react";
 import * as d3 from "d3";
 import * as topojson from "topojson-client";
 import { subsolarPoint } from "@/lib/solar";
-import type { Topology, Objects, GeometryCollection } from "topojson-specification";
+import type { Topology, Objects } from "topojson-specification";
 
 interface GlobeProps {
   dayOfYear: number;
@@ -23,6 +23,18 @@ export default function Globe({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const worldDataRef = useRef<Topology<Objects<any>> | null>(null);
   const projectionRef = useRef<d3.GeoProjection | null>(null);
+  const rotationRef = useRef<[number, number, number]>([0, -25, 0]);
+  // ドラッグハンドラからも最新のpropsを参照できるようにrefで保持
+  const dayOfYearRef = useRef(dayOfYear);
+  const hourUTCRef = useRef(hourUTC);
+
+  // propsが変わるたびにrefを更新
+  useEffect(() => {
+    dayOfYearRef.current = dayOfYear;
+  }, [dayOfYear]);
+  useEffect(() => {
+    hourUTCRef.current = hourUTC;
+  }, [hourUTC]);
 
   const loadWorldData = useCallback(async () => {
     if (worldDataRef.current) return worldDataRef.current;
@@ -32,35 +44,17 @@ export default function Globe({
     return data;
   }, []);
 
-  useEffect(() => {
-    if (!svgRef.current) return;
-
-    const svg = d3.select(svgRef.current);
-    const projection = d3
-      .geoOrthographic()
-      .scale(width / 2.2)
-      .translate([width / 2, height / 2])
-      .clipAngle(90)
-      .rotate([0, -25, 0]);
-
-    projectionRef.current = projection;
-    const path = d3.geoPath(projection);
-
-    // ドラッグで地球儀を回転
-    const drag = d3.drag<SVGSVGElement, unknown>().on("drag", (event) => {
-      const rotate = projection.rotate();
-      const k = 0.5; // 感度
-      projection.rotate([rotate[0] + event.dx * k, rotate[1] - event.dy * k]);
-      renderGlobe();
-    });
-
-    svg.call(drag);
-
-    const renderGlobe = async () => {
+  // 地球儀描画の共通関数
+  const drawGlobe = useCallback(
+    (
+      svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+      projection: d3.GeoProjection,
+      path: d3.GeoPath,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const world = (await loadWorldData()) as any;
-      const land = topojson.feature(world, world.objects.land);
-
+      land: any,
+      currentDayOfYear: number,
+      currentHourUTC: number
+    ) => {
       svg.selectAll("*").remove();
 
       // 海（背景の円）
@@ -93,7 +87,7 @@ export default function Globe({
         .attr("stroke-width", 0.5);
 
       // 昼夜境界線（ターミネーター）
-      const [sunLon, sunLat] = subsolarPoint(dayOfYear, hourUTC);
+      const [sunLon, sunLat] = subsolarPoint(currentDayOfYear, currentHourUTC);
       const nightCircle = d3
         .geoCircle()
         .center([sunLon + 180, -sunLat])
@@ -172,10 +166,72 @@ export default function Globe({
         .attr("fill", "none")
         .attr("stroke", "#455a64")
         .attr("stroke-width", 1.5);
+    },
+    [width, height]
+  );
+
+  // プロジェクションとドラッグの初期化（width/height変更時のみ再実行）
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    const projection = d3
+      .geoOrthographic()
+      .scale(width / 2.2)
+      .translate([width / 2, height / 2])
+      .clipAngle(90)
+      .rotate(rotationRef.current);
+
+    projectionRef.current = projection;
+
+    // ドラッグで地球儀を回転
+    const drag = d3.drag<SVGSVGElement, unknown>().on("drag", (event) => {
+      const rotate = projection.rotate();
+      const k = 0.5; // 感度
+      const newRotation: [number, number, number] = [
+        rotate[0] + event.dx * k,
+        rotate[1] - event.dy * k,
+        rotate[2],
+      ];
+      projection.rotate(newRotation);
+      rotationRef.current = newRotation;
+
+      // ドラッグ時はrefから最新のprops値を読む
+      if (!worldDataRef.current) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const world = worldDataRef.current as any;
+      const land = topojson.feature(world, world.objects.land);
+      const currentPath = d3.geoPath(projection);
+      drawGlobe(
+        svg,
+        projection,
+        currentPath,
+        land,
+        dayOfYearRef.current,
+        hourUTCRef.current
+      );
+    });
+
+    svg.call(drag);
+  }, [width, height, drawGlobe]);
+
+  // dayOfYear/hourUTC変更時のレンダリング（プロジェクションは再利用）
+  useEffect(() => {
+    if (!svgRef.current || !projectionRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    const projection = projectionRef.current;
+    const path = d3.geoPath(projection);
+
+    const renderGlobe = async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const world = (await loadWorldData()) as any;
+      const land = topojson.feature(world, world.objects.land);
+      drawGlobe(svg, projection, path, land, dayOfYear, hourUTC);
     };
 
     renderGlobe();
-  }, [dayOfYear, hourUTC, width, height, loadWorldData]);
+  }, [dayOfYear, hourUTC, width, height, loadWorldData, drawGlobe]);
 
   return (
     <svg
