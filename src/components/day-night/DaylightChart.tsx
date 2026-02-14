@@ -11,7 +11,6 @@ import {
 
 interface DaylightChartProps {
   dayOfYear: number;
-  selectedLatitude?: number;
   width?: number;
   height?: number;
 }
@@ -28,7 +27,6 @@ const COLORS = [
 
 export default function DaylightChart({
   dayOfYear,
-  selectedLatitude,
   width = 600,
   height = 350,
 }: DaylightChartProps) {
@@ -105,15 +103,13 @@ export default function DaylightChart({
         data.push(daylightHours(lat.value, d));
       }
 
-      const isSelected = selectedLatitude === lat.value;
-
       g.append("path")
         .datum(data)
         .attr("d", line)
         .attr("fill", "none")
         .attr("stroke", COLORS[idx])
-        .attr("stroke-width", isSelected ? 3 : 1.5)
-        .attr("opacity", isSelected ? 1 : 0.7);
+        .attr("stroke-width", 1.5)
+        .attr("opacity", 0.85);
 
       // 凡例
       const legendY = idx * 20;
@@ -131,7 +127,7 @@ export default function DaylightChart({
         .attr("y1", 0)
         .attr("y2", 0)
         .attr("stroke", COLORS[idx])
-        .attr("stroke-width", isSelected ? 3 : 1.5);
+        .attr("stroke-width", 1.5);
 
       legend
         .append("text")
@@ -139,8 +135,7 @@ export default function DaylightChart({
         .attr("y", 4)
         .text(`${lat.value > 0 ? "N" : lat.value < 0 ? "S" : ""}${Math.abs(lat.value)}°`)
         .style("font-size", "10px")
-        .style("fill", "#333")
-        .style("font-weight", isSelected ? "bold" : "normal");
+        .style("fill", "#333");
     });
 
     // 現在の日付の縦線
@@ -163,7 +158,7 @@ export default function DaylightChart({
       .style("fill", "#d32f2f")
       .style("font-weight", "bold")
       .text(`${dateInfo.month}/${dateInfo.day}`);
-  }, [dayOfYear, selectedLatitude, width, height]);
+  }, [dayOfYear, width, height]);
 
   return (
     <svg

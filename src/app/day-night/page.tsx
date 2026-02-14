@@ -7,20 +7,14 @@ import {
   Paper,
   Typography,
   Box,
-  Card,
-  CardContent,
-  Divider,
 } from "@mui/material";
 import Globe from "@/components/day-night/Globe";
 import DaylightChart from "@/components/day-night/DaylightChart";
-import AxialTiltDiagram from "@/components/day-night/AxialTiltDiagram";
 import DateControls from "@/components/day-night/DateControls";
-import { daylightHours, doyToDate, solarDeclination } from "@/lib/solar";
 
 export default function DayNightPage() {
   const [dayOfYear, setDayOfYear] = useState(172); // 夏至から開始
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedLatitude, setSelectedLatitude] = useState(45);
   const animRef = useRef<NodeJS.Timeout | null>(null);
 
   const handlePlayToggle = useCallback(() => {
@@ -44,10 +38,6 @@ export default function DayNightPage() {
       if (animRef.current) clearInterval(animRef.current);
     };
   }, [isPlaying]);
-
-  const dateInfo = doyToDate(dayOfYear);
-  const currentDaylight = daylightHours(selectedLatitude, dayOfYear);
-  const declination = solarDeclination(dayOfYear);
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -114,67 +104,12 @@ export default function DayNightPage() {
               isPlaying={isPlaying}
               onPlayToggle={handlePlayToggle}
               onReset={handleReset}
-              selectedLatitude={selectedLatitude}
-              onLatitudeChange={setSelectedLatitude}
             />
           </Paper>
         </Grid>
 
         {/* 右カラム: グラフ + 解説 */}
         <Grid size={{ xs: 12, md: 7 }}>
-          {/* 情報カード */}
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid size={{ xs: 6, sm: 3 }}>
-              <Card variant="outlined">
-                <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
-                  <Typography variant="caption" color="text.secondary">
-                    日付
-                  </Typography>
-                  <Typography variant="h6">
-                    {dateInfo.month}/{dateInfo.day}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 6, sm: 3 }}>
-              <Card variant="outlined">
-                <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
-                  <Typography variant="caption" color="text.secondary">
-                    太陽赤緯
-                  </Typography>
-                  <Typography variant="h6">
-                    {declination > 0 ? "+" : ""}
-                    {declination.toFixed(1)}°
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 6, sm: 3 }}>
-              <Card variant="outlined">
-                <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
-                  <Typography variant="caption" color="text.secondary">
-                    昼の長さ
-                  </Typography>
-                  <Typography variant="h6">
-                    {currentDaylight.toFixed(1)}h
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 6, sm: 3 }}>
-              <Card variant="outlined">
-                <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
-                  <Typography variant="caption" color="text.secondary">
-                    夜の長さ
-                  </Typography>
-                  <Typography variant="h6">
-                    {(24 - currentDaylight).toFixed(1)}h
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
           {/* 昼間時間グラフ */}
           <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6" gutterBottom>
@@ -183,33 +118,10 @@ export default function DayNightPage() {
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <DaylightChart
                 dayOfYear={dayOfYear}
-                selectedLatitude={selectedLatitude}
                 width={650}
                 height={320}
               />
             </Box>
-          </Paper>
-
-          {/* 地軸傾斜ダイアグラム */}
-          <Paper elevation={2} sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              地軸の傾きと太陽光
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <AxialTiltDiagram
-                dayOfYear={dayOfYear}
-                width={380}
-                height={300}
-              />
-            </Box>
-            <Divider sx={{ my: 1.5 }} />
-            <Typography variant="body2" color="text.secondary">
-              地球の地軸は公転面の垂直方向から23.4度傾いています。
-              夏至の頃は北半球が太陽に向かって傾くため、北半球では昼が長くなり、
-              冬至の頃は南半球が太陽に向かって傾くため、北半球では夜が長くなります。
-              赤道付近ではこの影響が小さく、年間を通じてほぼ12時間ずつです。
-              北極圏・南極圏では白夜や極夜が発生します。
-            </Typography>
           </Paper>
         </Grid>
       </Grid>
