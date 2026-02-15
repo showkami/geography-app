@@ -53,14 +53,24 @@ function getTiltDescription(tilt: number): { label: string; color: string } {
   return { label: "天王星のような横倒し状態", color: "#880e4f" };
 }
 
-/** 各月1日の通日 */
-const MONTH_START_DAYS = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
+/** 冬至の通日（0度=上に配置） */
+const WINTER_SOLSTICE_DOY = 356;
 
-/** 日付スライダー用の月ラベル */
-const DATE_LABELS = MONTH_START_DAYS.map((day, i) => ({
-  value: day,
-  label: `${i + 1}月`,
-}));
+/**
+ * 日付スライダー用ラベル
+ * 四季（冬至・春分・夏至・秋分）を基本軸として、
+ * 間に月ラベルを配置して8等分に近い分布にする
+ */
+const DATE_LABELS = [
+  { value: 356, label: "冬至" },
+  { value: 32, label: "2月" },
+  { value: 80, label: "春分" },
+  { value: 121, label: "5月" },
+  { value: 172, label: "夏至" },
+  { value: 213, label: "8月" },
+  { value: 266, label: "秋分" },
+  { value: 305, label: "11月" },
+];
 
 /** 時刻スライダー用の時刻ラベル */
 const HOUR_LABELS = [0, 3, 6, 9, 12, 15, 18, 21].map((h) => ({
@@ -120,6 +130,7 @@ export default function DateControls({
             color="#1976d2"
             labels={DATE_LABELS}
             fullCircleValue={365}
+            startValue={WINTER_SOLSTICE_DOY}
           >
             <div
               style={{

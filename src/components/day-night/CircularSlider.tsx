@@ -29,6 +29,11 @@ interface CircularSliderProps {
    * 例: 日付(1〜365)は365、時刻(0〜24)は24
    */
   fullCircleValue?: number;
+  /**
+   * 0度（上）に配置する値。デフォルトは min。
+   * 例: 冬至(day 356)を上に置きたい場合は startValue={356}
+   */
+  startValue?: number;
   /** 中央に表示するコンテンツ */
   children?: React.ReactNode;
 }
@@ -56,28 +61,39 @@ export default function CircularSlider({
   color = "#1976d2",
   labels = [],
   fullCircleValue,
+  startValue,
   children,
 }: CircularSliderProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const fullRange = fullCircleValue ?? max - min;
+  const start = startValue ?? min;
+  const TWO_PI = Math.PI * 2;
 
+  // 値 → 角度 (ラジアン, 0=上, 時計回り)
+  // startValue が0度（上）にくるようオフセット
   const valueToAngle = useCallback(
-    (val: number): number => ((val - min) / fullRange) * Math.PI * 2,
-    [min, fullRange]
+    (val: number): number => {
+      const raw = ((val - start) / fullRange) * TWO_PI;
+      return ((raw % TWO_PI) + TWO_PI) % TWO_PI;
+    },
+    [start, fullRange, TWO_PI]
   );
 
+  // 角度 → 値（stepにスナップ、[min, max] に循環ラップ）
   const angleToValue = useCallback(
     (angle: number): number => {
-      let norm = angle / (Math.PI * 2);
+      let norm = angle / TWO_PI;
       if (norm < 0) norm += 1;
       if (norm >= 1) norm -= Math.floor(norm);
-      let val = min + norm * fullRange;
+      const rawVal = start + norm * fullRange;
+      // [min, max] 範囲に循環ラップ
+      let val = min + (((rawVal - min) % fullRange) + fullRange) % fullRange;
       val = Math.round((val - min) / step) * step + min;
       return Math.max(min, Math.min(max, val));
     },
-    [min, max, fullRange, step]
+    [start, min, max, fullRange, step, TWO_PI]
   );
 
   const toXY = useCallback(
