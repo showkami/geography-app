@@ -19,7 +19,7 @@ export default function ThemeRegistry({
       <Box
         component="main"
         sx={{
-          minHeight: "calc(100vh - 64px)",
+          minHeight: "calc(100vh - 49px)",
           bgcolor: "background.default",
         }}
       >
