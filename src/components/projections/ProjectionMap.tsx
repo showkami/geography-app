@@ -31,6 +31,14 @@ export default function ProjectionMap({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const worldDataRef = useRef<any>(null);
 
+  // ドラッグ中に最新の回転値を参照するための ref
+  const rotationRef = useRef({ lambda, phi });
+  rotationRef.current.lambda = lambda;
+  rotationRef.current.phi = phi;
+
+  const onRotationChangeRef = useRef(onRotationChange);
+  onRotationChangeRef.current = onRotationChange;
+
   const loadWorldData = useCallback(async () => {
     if (worldDataRef.current) return worldDataRef.current;
     const res = await fetch("/data/world-110m.json");
@@ -39,6 +47,31 @@ export default function ProjectionMap({
     return data;
   }, []);
 
+  // ドラッグ操作の設定（レンダリングとは独立）
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+
+    const drag = d3.drag<SVGSVGElement, unknown>().on("drag", (event) => {
+      const sensitivity = 0.5;
+      const current = rotationRef.current;
+      const newLambda = current.lambda + event.dx * sensitivity;
+      const newPhi = Math.max(
+        -90,
+        Math.min(90, current.phi - event.dy * sensitivity)
+      );
+      onRotationChangeRef.current(newLambda, newPhi);
+    });
+
+    svg.call(drag);
+
+    return () => {
+      svg.on(".drag", null);
+    };
+  }, []); // ドラッグは一度だけ設定
+
+  // 地図のレンダリング
   useEffect(() => {
     if (!svgRef.current) return;
 
@@ -79,16 +112,6 @@ export default function ProjectionMap({
     projection.scale(scale);
 
     const path = d3.geoPath(projection);
-
-    // ドラッグで回転
-    const drag = d3.drag<SVGSVGElement, unknown>().on("drag", (event) => {
-      const sensitivity = 0.5;
-      const newLambda = lambda + event.dx * sensitivity;
-      const newPhi = Math.max(-90, Math.min(90, phi - event.dy * sensitivity));
-      onRotationChange(newLambda, newPhi);
-    });
-
-    svg.call(drag);
 
     const render = async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
