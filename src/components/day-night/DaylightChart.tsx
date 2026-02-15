@@ -4,13 +4,15 @@ import React, { useRef, useEffect } from "react";
 import * as d3 from "d3";
 import {
   daylightHours,
-  LATITUDE_PRESETS,
+  getLatitudePresets,
   doyToDate,
   MONTH_NAMES_JA,
+  AXIAL_TILT_DEFAULT,
 } from "@/lib/solar";
 
 interface DaylightChartProps {
   dayOfYear: number;
+  axialTilt?: number;
   width?: number;
   height?: number;
 }
@@ -27,6 +29,7 @@ const COLORS = [
 
 export default function DaylightChart({
   dayOfYear,
+  axialTilt = AXIAL_TILT_DEFAULT,
   width = 600,
   height = 350,
 }: DaylightChartProps) {
@@ -90,7 +93,7 @@ export default function DaylightChart({
       .attr("stroke-dasharray", "4,4");
 
     // 各緯度の昼間時間ライン
-    const latitudes = LATITUDE_PRESETS;
+    const latitudes = getLatitudePresets(axialTilt);
     const line = d3
       .line<number>()
       .x((_, i) => xScale(i + 1))
@@ -100,7 +103,7 @@ export default function DaylightChart({
     latitudes.forEach((lat, idx) => {
       const data: number[] = [];
       for (let d = 1; d <= 365; d++) {
-        data.push(daylightHours(lat.value, d));
+        data.push(daylightHours(lat.value, d, axialTilt));
       }
 
       g.append("path")
@@ -158,7 +161,7 @@ export default function DaylightChart({
       .style("fill", "#d32f2f")
       .style("font-weight", "bold")
       .text(`${dateInfo.month}/${dateInfo.day}`);
-  }, [dayOfYear, width, height]);
+  }, [dayOfYear, axialTilt, width, height]);
 
   return (
     <svg

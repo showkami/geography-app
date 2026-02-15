@@ -2,16 +2,25 @@
 
 import React, { useRef, useEffect, useMemo, useId } from "react";
 import * as d3 from "d3";
-import { solarNoonAltitude, MONTH_NAMES_JA, doyToDate } from "@/lib/solar";
+import {
+  solarNoonAltitude,
+  MONTH_NAMES_JA,
+  doyToDate,
+  AXIAL_TILT_DEFAULT,
+  tropicLatitude,
+  arcticCircleLatitude,
+} from "@/lib/solar";
 
 interface SolarAltitudeContourChartProps {
   dayOfYear: number;
+  axialTilt?: number;
   width?: number;
   height?: number;
 }
 
 export default function SolarAltitudeContourChart({
   dayOfYear,
+  axialTilt = AXIAL_TILT_DEFAULT,
   width = 650,
   height = 420,
 }: SolarAltitudeContourChartProps) {
@@ -19,7 +28,7 @@ export default function SolarAltitudeContourChart({
   const rawId = useId();
   const uid = rawId.replace(/:/g, "");
 
-  // Pre-compute the solar altitude grid (independent of dayOfYear)
+  // Pre-compute the solar altitude grid (recompute when axialTilt changes)
   const gridData = useMemo(() => {
     const nx = 365; // days of year
     const ny = 181; // latitudes: 90°N to 90°S (1° steps)
@@ -27,7 +36,7 @@ export default function SolarAltitudeContourChart({
     for (let iy = 0; iy < ny; iy++) {
       const lat = 90 - iy; // iy=0 → 90°N, iy=180 → 90°S
       for (let ix = 0; ix < nx; ix++) {
-        values[iy * nx + ix] = solarNoonAltitude(lat, ix + 1);
+        values[iy * nx + ix] = solarNoonAltitude(lat, ix + 1, axialTilt);
       }
     }
     // Compute annual average solar noon altitude per latitude
@@ -40,7 +49,7 @@ export default function SolarAltitudeContourChart({
       avgByLat[iy] = sum / nx;
     }
     return { values, nx, ny, avgByLat };
-  }, []);
+  }, [axialTilt]);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -130,7 +139,9 @@ export default function SolarAltitudeContourChart({
       .attr("stroke-width", (d) => (d.value === 90 ? 1.5 : 0.7));
 
     // --- Special latitude reference lines ---
-    const specialLats = [66.5, 23.4, 0, -23.4, -66.5];
+    const tropic = tropicLatitude(axialTilt);
+    const arctic = arcticCircleLatitude(axialTilt);
+    const specialLats = [arctic, tropic, 0, -tropic, -arctic];
     specialLats.forEach((lat) => {
       g.append("line")
         .attr("x1", 0)
@@ -209,12 +220,15 @@ export default function SolarAltitudeContourChart({
       .selectAll("text")
       .style("font-size", "11px");
 
-    // Y axis (latitude)
+    // Y axis (latitude) — tick values adapt to current axial tilt
+    const yTickValues = Array.from(
+      new Set([-90, -arctic, -45, -tropic, 0, tropic, 45, arctic, 90].map(v => Math.round(v * 10) / 10))
+    ).sort((a, b) => b - a);
     g.append("g")
       .call(
         d3
           .axisLeft(latToY)
-          .tickValues([-90, -66.5, -45, -23.4, 0, 23.4, 45, 66.5, 90])
+          .tickValues(yTickValues)
           .tickFormat((d) => {
             const v = d as number;
             if (v === 0) return "0°";
@@ -593,7 +607,7 @@ export default function SolarAltitudeContourChart({
         const latVal = latToY.invert(cy);
         const clampedDay = Math.max(1, Math.min(365, dayVal));
         const clampedLat = Math.max(-90, Math.min(90, latVal));
-        const altitude = solarNoonAltitude(clampedLat, clampedDay);
+        const altitude = solarNoonAltitude(clampedLat, clampedDay, axialTilt);
         const dateInfo = doyToDate(clampedDay);
 
         crosshairV.attr("x1", cx).attr("x2", cx).style("display", null);
@@ -638,7 +652,7 @@ export default function SolarAltitudeContourChart({
         crosshairH.style("display", "none");
         tooltip.style("display", "none");
       });
-  }, [dayOfYear, width, height, gridData, uid]);
+  }, [dayOfYear, axialTilt, width, height, gridData, uid]);
 
   return (
     <svg

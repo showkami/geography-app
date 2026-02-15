@@ -3,12 +3,18 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import * as d3 from "d3";
 import * as topojson from "topojson-client";
-import { subsolarPoint } from "@/lib/solar";
+import {
+  subsolarPoint,
+  AXIAL_TILT_DEFAULT,
+  tropicLatitude,
+  arcticCircleLatitude,
+} from "@/lib/solar";
 import type { Topology, Objects } from "topojson-specification";
 
 interface GlobeProps {
   dayOfYear: number;
   hourUTC?: number;
+  axialTilt?: number;
   width?: number;
   height?: number;
 }
@@ -16,6 +22,7 @@ interface GlobeProps {
 export default function Globe({
   dayOfYear,
   hourUTC = 12,
+  axialTilt = AXIAL_TILT_DEFAULT,
   width = 500,
   height = 500,
 }: GlobeProps) {
@@ -27,6 +34,7 @@ export default function Globe({
   // ドラッグハンドラからも最新のpropsを参照できるようにrefで保持
   const dayOfYearRef = useRef(dayOfYear);
   const hourUTCRef = useRef(hourUTC);
+  const axialTiltRef = useRef(axialTilt);
 
   // propsが変わるたびにrefを更新
   useEffect(() => {
@@ -35,6 +43,9 @@ export default function Globe({
   useEffect(() => {
     hourUTCRef.current = hourUTC;
   }, [hourUTC]);
+  useEffect(() => {
+    axialTiltRef.current = axialTilt;
+  }, [axialTilt]);
 
   const loadWorldData = useCallback(async () => {
     if (worldDataRef.current) return worldDataRef.current;
@@ -53,9 +64,13 @@ export default function Globe({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       land: any,
       currentDayOfYear: number,
-      currentHourUTC: number
+      currentHourUTC: number,
+      currentAxialTilt: number
     ) => {
       svg.selectAll("*").remove();
+
+      const currentTropic = tropicLatitude(currentAxialTilt);
+      const currentArctic = arcticCircleLatitude(currentAxialTilt);
 
       // 海（背景の円）
       svg
@@ -87,7 +102,11 @@ export default function Globe({
         .attr("stroke-width", 0.5);
 
       // 昼夜境界線（ターミネーター）
-      const [sunLon, sunLat] = subsolarPoint(currentDayOfYear, currentHourUTC);
+      const [sunLon, sunLat] = subsolarPoint(
+        currentDayOfYear,
+        currentHourUTC,
+        currentAxialTilt
+      );
       const nightCircle = d3
         .geoCircle()
         .center([sunLon + 180, -sunLat])
@@ -112,37 +131,41 @@ export default function Globe({
         .attr("stroke-width", 1)
         .attr("stroke-dasharray", "4,3");
 
-      // 北回帰線・南回帰線
-      [23.4, -23.4].forEach((lat) => {
-        const tropic = d3
-          .geoCircle()
-          .center([0, lat > 0 ? 90 : -90])
-          .radius(90 - Math.abs(lat));
-        svg
-          .append("path")
-          .datum(tropic())
-          .attr("d", path)
-          .attr("fill", "none")
-          .attr("stroke", "#ff9800")
-          .attr("stroke-width", 0.8)
-          .attr("stroke-dasharray", "3,3");
-      });
+      // 北回帰線・南回帰線（地軸の傾きに基づく動的緯度）
+      if (currentTropic > 0.5) {
+        [currentTropic, -currentTropic].forEach((lat) => {
+          const tropicCircle = d3
+            .geoCircle()
+            .center([0, lat > 0 ? 90 : -90])
+            .radius(90 - Math.abs(lat));
+          svg
+            .append("path")
+            .datum(tropicCircle())
+            .attr("d", path)
+            .attr("fill", "none")
+            .attr("stroke", "#ff9800")
+            .attr("stroke-width", 0.8)
+            .attr("stroke-dasharray", "3,3");
+        });
+      }
 
-      // 北極圏・南極圏
-      [66.5, -66.5].forEach((lat) => {
-        const arcticCircle = d3
-          .geoCircle()
-          .center([0, lat > 0 ? 90 : -90])
-          .radius(90 - Math.abs(lat));
-        svg
-          .append("path")
-          .datum(arcticCircle())
-          .attr("d", path)
-          .attr("fill", "none")
-          .attr("stroke", "#2196f3")
-          .attr("stroke-width", 0.8)
-          .attr("stroke-dasharray", "3,3");
-      });
+      // 北極圏・南極圏（地軸の傾きに基づく動的緯度）
+      if (currentArctic < 89.5) {
+        [currentArctic, -currentArctic].forEach((lat) => {
+          const arcticCircle = d3
+            .geoCircle()
+            .center([0, lat > 0 ? 90 : -90])
+            .radius(90 - Math.abs(lat));
+          svg
+            .append("path")
+            .datum(arcticCircle())
+            .attr("d", path)
+            .attr("fill", "none")
+            .attr("stroke", "#2196f3")
+            .attr("stroke-width", 0.8)
+            .attr("stroke-dasharray", "3,3");
+        });
+      }
 
       // 太陽直下点
       const sunProjected = projection([sunLon, sunLat]);
@@ -208,7 +231,8 @@ export default function Globe({
         currentPath,
         land,
         dayOfYearRef.current,
-        hourUTCRef.current
+        hourUTCRef.current,
+        axialTiltRef.current
       );
     });
 
@@ -227,11 +251,11 @@ export default function Globe({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const world = (await loadWorldData()) as any;
       const land = topojson.feature(world, world.objects.land);
-      drawGlobe(svg, projection, path, land, dayOfYear, hourUTC);
+      drawGlobe(svg, projection, path, land, dayOfYear, hourUTC, axialTilt);
     };
 
     renderGlobe();
-  }, [dayOfYear, hourUTC, width, height, loadWorldData, drawGlobe]);
+  }, [dayOfYear, hourUTC, axialTilt, width, height, loadWorldData, drawGlobe]);
 
   return (
     <svg

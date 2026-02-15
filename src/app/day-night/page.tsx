@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { AXIAL_TILT_DEFAULT } from "@/lib/solar";
 import {
   Container,
   Grid,
@@ -22,6 +23,7 @@ import DateControls from "@/components/day-night/DateControls";
 export default function DayNightPage() {
   const [dayOfYear, setDayOfYear] = useState(172); // 夏至から開始
   const [hourUTC, setHourUTC] = useState(12); // UTC正午から開始
+  const [axialTilt, setAxialTilt] = useState(AXIAL_TILT_DEFAULT); // 地軸の傾き
   const [isPlaying, setIsPlaying] = useState(false);
   const animRef = useRef<NodeJS.Timeout | null>(null);
   const [contourOpen, setContourOpen] = useState(false);
@@ -67,7 +69,7 @@ export default function DayNightPage() {
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 720 }}>
           地球の地軸は公転面に対して23.4度傾いています。この傾きによって、季節ごとに昼と夜の長さが変化します。
-          日付を変えて、地球上の昼夜の境界線がどう変わるか観察しましょう。
+          日付や地軸の傾きを変えて、昼夜の境界線や季節の変化がどう変わるかシミュレーションしましょう。
         </Typography>
       </Box>
 
@@ -81,7 +83,7 @@ export default function DayNightPage() {
             <Box
               sx={{ display: "flex", justifyContent: "center" }}
             >
-              <Globe dayOfYear={dayOfYear} hourUTC={hourUTC} width={450} height={450} />
+              <Globe dayOfYear={dayOfYear} hourUTC={hourUTC} axialTilt={axialTilt} width={450} height={450} />
             </Box>
             <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -116,6 +118,8 @@ export default function DayNightPage() {
               isPlaying={isPlaying}
               onPlayToggle={handlePlayToggle}
               onReset={handleReset}
+              axialTilt={axialTilt}
+              onAxialTiltChange={setAxialTilt}
             />
           </Paper>
         </Grid>
@@ -156,6 +160,7 @@ export default function DayNightPage() {
             >
               <DaylightContourChart
                 dayOfYear={dayOfYear}
+                axialTilt={axialTilt}
                 width={650}
                 height={420}
               />
@@ -196,6 +201,7 @@ export default function DayNightPage() {
             >
               <SolarAltitudeContourChart
                 dayOfYear={dayOfYear}
+                axialTilt={axialTilt}
                 width={650}
                 height={420}
               />
@@ -232,6 +238,7 @@ export default function DayNightPage() {
         <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
           <DaylightContourChart
             dayOfYear={dayOfYear}
+            axialTilt={axialTilt}
             width={1100}
             height={660}
           />
@@ -266,6 +273,7 @@ export default function DayNightPage() {
         <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
           <SolarAltitudeContourChart
             dayOfYear={dayOfYear}
+            axialTilt={axialTilt}
             width={1100}
             height={660}
           />

@@ -2,16 +2,18 @@
 
 import React, { useRef, useEffect } from "react";
 import * as d3 from "d3";
-import { solarDeclination, AXIAL_TILT } from "@/lib/solar";
+import { solarDeclination, AXIAL_TILT_DEFAULT } from "@/lib/solar";
 
 interface AxialTiltDiagramProps {
   dayOfYear: number;
+  axialTilt?: number;
   width?: number;
   height?: number;
 }
 
 export default function AxialTiltDiagram({
   dayOfYear,
+  axialTilt = AXIAL_TILT_DEFAULT,
   width = 360,
   height = 320,
 }: AxialTiltDiagramProps) {
@@ -26,8 +28,8 @@ export default function AxialTiltDiagram({
     const cx = width / 2;
     const cy = height / 2 + 10;
     const earthRadius = Math.min(width, height) * 0.25;
-    const declination = solarDeclination(dayOfYear);
-    const tiltRad = (AXIAL_TILT * Math.PI) / 180;
+    const declination = solarDeclination(dayOfYear, axialTilt);
+    const tiltRad = (axialTilt * Math.PI) / 180;
 
     // 太陽光の方向（左から）
     const sunX = cx - width * 0.42;
@@ -149,7 +151,7 @@ export default function AxialTiltDiagram({
       .append("ellipse")
       .attr("rx", earthRadius)
       .attr("ry", earthRadius * 0.15)
-      .attr("transform", `rotate(${-AXIAL_TILT})`)
+      .attr("transform", `rotate(${-axialTilt})`)
       .attr("fill", "none")
       .attr("stroke", "#2196f3")
       .attr("stroke-width", 1)
@@ -187,7 +189,7 @@ export default function AxialTiltDiagram({
       .attr("y", -(axisLen * 0.5 + 6))
       .style("font-size", "11px")
       .style("fill", "#ff5722")
-      .text(`${AXIAL_TILT}°`);
+      .text(`${axialTilt.toFixed(1)}°`);
 
     // 太陽赤緯の情報テキスト
     svg
@@ -198,7 +200,7 @@ export default function AxialTiltDiagram({
       .style("font-size", "12px")
       .style("fill", "#555")
       .text(`太陽赤緯: ${declination > 0 ? "+" : ""}${declination.toFixed(1)}°`);
-  }, [dayOfYear, width, height]);
+  }, [dayOfYear, axialTilt, width, height]);
 
   return (
     <svg
