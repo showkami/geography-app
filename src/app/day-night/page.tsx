@@ -8,17 +8,12 @@ import {
   Paper,
   Typography,
   Box,
-  Dialog,
-  DialogContent,
-  IconButton,
-  Tooltip,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import Globe from "@/components/day-night/Globe";
 import DaylightContourChart from "@/components/day-night/DaylightContourChart";
 import SolarAltitudeContourChart from "@/components/day-night/SolarAltitudeContourChart";
 import DateControls from "@/components/day-night/DateControls";
+import ZoomableChartCard from "@/components/day-night/ZoomableChartCard";
 
 export default function DayNightPage() {
   const [dayOfYear, setDayOfYear] = useState(172); // 夏至から開始
@@ -26,8 +21,6 @@ export default function DayNightPage() {
   const [axialTilt, setAxialTilt] = useState(AXIAL_TILT_DEFAULT); // 地軸の傾き
   const [isPlaying, setIsPlaying] = useState(false);
   const animRef = useRef<NodeJS.Timeout | null>(null);
-  const [contourOpen, setContourOpen] = useState(false);
-  const [altitudeOpen, setAltitudeOpen] = useState(false);
 
   const handlePlayToggle = useCallback(() => {
     setIsPlaying((prev) => !prev);
@@ -104,146 +97,35 @@ export default function DayNightPage() {
         {/* 右カラム: 等高線プロット */}
         <Grid size={{ xs: 12, md: 7 }}>
           {/* 昼間時間の等高線プロット */}
-          <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 0 }}>
-                昼間時間の分布（緯度 × 月）
-              </Typography>
-              <Tooltip title="クリックで拡大表示">
-                <IconButton
-                  size="small"
-                  onClick={() => setContourOpen(true)}
-                  sx={{ color: "text.secondary" }}
-                >
-                  <ZoomInIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                cursor: "pointer",
-                borderRadius: 1,
-                transition: "box-shadow 0.2s",
-                "&:hover": {
-                  boxShadow: "0 0 0 2px rgba(29,78,216,0.3)",
-                },
-              }}
-              onClick={() => setContourOpen(true)}
-            >
+          <ZoomableChartCard
+            title="昼間時間の分布（緯度 × 月）"
+            description=""
+            renderChart={(w, h) => (
               <DaylightContourChart
                 dayOfYear={dayOfYear}
                 axialTilt={axialTilt}
-                width={650}
-                height={420}
+                width={w}
+                height={h}
               />
-            </Box>
-          </Paper>
+            )}
+            paperSx={{ mb: 2 }}
+          />
 
           {/* 太陽南中高度の等高線プロット */}
-          <Paper elevation={2} sx={{ p: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 0 }}>
-                太陽南中高度の分布（緯度 × 月）
-              </Typography>
-              <Tooltip title="クリックで拡大表示">
-                <IconButton
-                  size="small"
-                  onClick={() => setAltitudeOpen(true)}
-                  sx={{ color: "text.secondary" }}
-                >
-                  <ZoomInIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                cursor: "pointer",
-                borderRadius: 1,
-                transition: "box-shadow 0.2s",
-                "&:hover": {
-                  boxShadow: "0 0 0 2px rgba(29,78,216,0.3)",
-                },
-              }}
-              onClick={() => setAltitudeOpen(true)}
-            >
+          <ZoomableChartCard
+            title="太陽南中高度の分布（緯度 × 月）"
+            description=""
+            renderChart={(w, h) => (
               <SolarAltitudeContourChart
                 dayOfYear={dayOfYear}
                 axialTilt={axialTilt}
-                width={650}
-                height={420}
+                width={w}
+                height={h}
               />
-            </Box>
-          </Paper>
+            )}
+          />
         </Grid>
       </Grid>
-
-      {/* 拡大ダイアログ */}
-      <Dialog
-        open={contourOpen}
-        onClose={() => setContourOpen(false)}
-        maxWidth={false}
-        PaperProps={{
-          sx: {
-            width: "min(95vw, 1200px)",
-            maxHeight: "95vh",
-            p: 2,
-            borderRadius: 3,
-          },
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            昼間時間の分布（緯度 × 月）
-          </Typography>
-          <IconButton onClick={() => setContourOpen(false)} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
-          <DaylightContourChart
-            dayOfYear={dayOfYear}
-            axialTilt={axialTilt}
-            width={1100}
-            height={660}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* 太陽南中高度 拡大ダイアログ */}
-      <Dialog
-        open={altitudeOpen}
-        onClose={() => setAltitudeOpen(false)}
-        maxWidth={false}
-        PaperProps={{
-          sx: {
-            width: "min(95vw, 1200px)",
-            maxHeight: "95vh",
-            p: 2,
-            borderRadius: 3,
-          },
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            太陽南中高度の分布（緯度 × 月）
-          </Typography>
-          <IconButton onClick={() => setAltitudeOpen(false)} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
-          <SolarAltitudeContourChart
-            dayOfYear={dayOfYear}
-            axialTilt={axialTilt}
-            width={1100}
-            height={660}
-          />
-        </DialogContent>
-      </Dialog>
     </Container>
   );
 }
