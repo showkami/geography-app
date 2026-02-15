@@ -30,17 +30,26 @@ export default function DaylightContourChart({
         values[iy * nx + ix] = daylightHours(lat, ix + 1);
       }
     }
-    return { values, nx, ny };
+    // Compute annual average daylight hours per latitude
+    const avgByLat = new Float64Array(ny);
+    for (let iy = 0; iy < ny; iy++) {
+      let sum = 0;
+      for (let ix = 0; ix < nx; ix++) {
+        sum += values[iy * nx + ix];
+      }
+      avgByLat[iy] = sum / nx;
+    }
+    return { values, nx, ny, avgByLat };
   }, []);
 
   useEffect(() => {
     if (!svgRef.current) return;
-    const { values, nx, ny } = gridData;
+    const { values, nx, ny, avgByLat } = gridData;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 22, right: 80, bottom: 45, left: 60 };
+    const margin = { top: 22, right: 190, bottom: 45, left: 60 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
 
@@ -295,6 +304,235 @@ export default function DaylightContourChart({
       .style("font-size", "10px")
       .style("fill", "#555")
       .text("昼間時間");
+
+    // --- Annual average side chart ---
+    const sideW = 70;
+    const sideX = w + 85; // after color bar area
+    const sg = g.append("g").attr("transform", `translate(${sideX},0)`);
+
+    // Clip path for side chart
+    const sideClipId = `dl-side-clip-${uid}`;
+    defs
+      .append("clipPath")
+      .attr("id", sideClipId)
+      .append("rect")
+      .attr("width", sideW)
+      .attr("height", h);
+
+    // Background
+    sg.append("rect")
+      .attr("width", sideW)
+      .attr("height", h)
+      .attr("fill", "#fefce8")
+      .attr("stroke", "#e2e8f0")
+      .attr("stroke-width", 0.5);
+
+    // Scale for annual average daylight hours (x-axis of side chart)
+    const sideXScale = d3.scaleLinear().domain([0, 24]).range([0, sideW]);
+
+    // Reference grid lines
+    [6, 12, 18].forEach((v) => {
+      sg.append("line")
+        .attr("x1", sideXScale(v))
+        .attr("x2", sideXScale(v))
+        .attr("y1", 0)
+        .attr("y2", h)
+        .attr("stroke", "rgba(0,0,0,0.06)")
+        .attr("stroke-width", 0.5);
+    });
+
+    // Special latitude reference lines (continuing from contour chart)
+    specialLats.forEach((lat) => {
+      sg.append("line")
+        .attr("x1", 0)
+        .attr("x2", sideW)
+        .attr("y1", latToY(lat))
+        .attr("y2", latToY(lat))
+        .attr("stroke", "rgba(0,0,0,0.08)")
+        .attr("stroke-width", 0.5)
+        .attr("stroke-dasharray", "2,2");
+    });
+
+    // 12h reference line (equinox baseline)
+    sg.append("line")
+      .attr("x1", sideXScale(12))
+      .attr("x2", sideXScale(12))
+      .attr("y1", 0)
+      .attr("y2", h)
+      .attr("stroke", "rgba(0,0,0,0.15)")
+      .attr("stroke-width", 1)
+      .attr("stroke-dasharray", "4,3");
+
+    // Build line data: [avgHours, latitude]
+    const sideLineData: [number, number][] = [];
+    for (let iy = 0; iy < ny; iy++) {
+      sideLineData.push([avgByLat[iy], 90 - iy]);
+    }
+
+    const sideClipG = sg.append("g").attr("clip-path", `url(#${sideClipId})`);
+
+    // Area fill (from x=12h baseline to the line)
+    const sideAreaPath = d3
+      .area<[number, number]>()
+      .x0(sideXScale(12))
+      .x1((d) => sideXScale(d[0]))
+      .y((d) => latToY(d[1]))
+      .curve(d3.curveBasis);
+
+    sideClipG
+      .append("path")
+      .datum(sideLineData)
+      .attr("d", sideAreaPath)
+      .attr("fill", "rgba(234, 179, 8, 0.2)")
+      .attr("stroke", "none");
+
+    // Line
+    const sideLinePath = d3
+      .line<[number, number]>()
+      .x((d) => sideXScale(d[0]))
+      .y((d) => latToY(d[1]))
+      .curve(d3.curveBasis);
+
+    sideClipG
+      .append("path")
+      .datum(sideLineData)
+      .attr("d", sideLinePath)
+      .attr("fill", "none")
+      .attr("stroke", "#ca8a04")
+      .attr("stroke-width", 1.8);
+
+    // X axis (bottom) for side chart
+    sg.append("g")
+      .attr("transform", `translate(0,${h})`)
+      .call(
+        d3
+          .axisBottom(sideXScale)
+          .tickValues([0, 6, 12, 18, 24])
+          .tickFormat((d) => `${d}h`)
+      )
+      .selectAll("text")
+      .style("font-size", "9px");
+
+    // Title for side chart
+    sg.append("text")
+      .attr("x", sideW / 2)
+      .attr("y", -8)
+      .attr("text-anchor", "middle")
+      .style("font-size", "10px")
+      .style("fill", "#555")
+      .text("年間平均");
+
+    // --- Side chart hover interaction ---
+    const sideCrosshairH = sg
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", sideW)
+      .attr("stroke", "rgba(0,0,0,0.4)")
+      .attr("stroke-width", 0.8)
+      .attr("stroke-dasharray", "4,3")
+      .attr("pointer-events", "none")
+      .style("display", "none");
+
+    const sideDot = sg
+      .append("circle")
+      .attr("r", 4)
+      .attr("fill", "#ca8a04")
+      .attr("stroke", "white")
+      .attr("stroke-width", 1.5)
+      .attr("pointer-events", "none")
+      .style("display", "none");
+
+    // Side tooltip group
+    const sideTooltip = sg
+      .append("g")
+      .attr("pointer-events", "none")
+      .style("display", "none");
+
+    const sideTooltipBg = sideTooltip
+      .append("rect")
+      .attr("rx", 5)
+      .attr("ry", 5)
+      .attr("fill", "rgba(15,23,42,0.88)")
+      .attr("stroke", "rgba(255,255,255,0.15)")
+      .attr("stroke-width", 0.5);
+
+    const sideTooltipLine1 = sideTooltip
+      .append("text")
+      .attr("fill", "white")
+      .style("font-size", "11px")
+      .style("font-weight", "600");
+
+    const sideTooltipLine2 = sideTooltip
+      .append("text")
+      .attr("fill", "#fbbf24")
+      .style("font-size", "12px")
+      .style("font-weight", "700");
+
+    // Invisible overlay for side chart mouse events
+    sg.append("rect")
+      .attr("width", sideW)
+      .attr("height", h)
+      .attr("fill", "none")
+      .attr("pointer-events", "all")
+      .style("cursor", "crosshair")
+      .on("mousemove", function (event: MouseEvent) {
+        const [, my] = d3.pointer(event, this);
+        const cy = Math.max(0, Math.min(h, my));
+
+        const latVal = latToY.invert(cy);
+        const clampedLat = Math.max(-90, Math.min(90, latVal));
+
+        // Interpolate average daylight from avgByLat
+        const iyFloat = 90 - clampedLat;
+        const iy0 = Math.floor(iyFloat);
+        const iy1 = Math.min(ny - 1, iy0 + 1);
+        const frac = iyFloat - iy0;
+        const avgH = avgByLat[iy0] * (1 - frac) + avgByLat[iy1] * frac;
+
+        // Crosshair
+        sideCrosshairH.attr("y1", cy).attr("y2", cy).style("display", null);
+
+        // Dot on the line
+        const dotX = sideXScale(avgH);
+        sideDot.attr("cx", dotX).attr("cy", cy).style("display", null);
+
+        // Format
+        const latAbs = Math.abs(clampedLat).toFixed(1);
+        const latDir = clampedLat > 0 ? "°N" : clampedLat < 0 ? "°S" : "°";
+        const latStr = `緯度 ${latAbs}${latDir}`;
+        const avgStr = `平均 ${avgH.toFixed(1)}h`;
+
+        sideTooltipLine1.text(latStr);
+        sideTooltipLine2.text(avgStr);
+
+        // Measure text for sizing
+        const maxTW = Math.max(
+          (sideTooltipLine1.node()?.getComputedTextLength() ?? 0),
+          (sideTooltipLine2.node()?.getComputedTextLength() ?? 0)
+        );
+        const sPadX = 8;
+        const sPadY = 6;
+        const sLineH = 16;
+        const sBgW = maxTW + sPadX * 2;
+        const sBgH = sLineH * 2 + sPadY * 2 - 4;
+
+        // Position tooltip
+        let stx = dotX + 10;
+        let sty = cy - sBgH - 8;
+        if (stx + sBgW > sideW) stx = dotX - sBgW - 10;
+        if (stx < 0) stx = 2;
+        if (sty < 0) sty = cy + 10;
+
+        sideTooltip.attr("transform", `translate(${stx},${sty})`).style("display", null);
+        sideTooltipBg.attr("width", sBgW).attr("height", sBgH);
+        sideTooltipLine1.attr("x", sPadX).attr("y", sPadY + 12);
+        sideTooltipLine2.attr("x", sPadX).attr("y", sPadY + 12 + sLineH);
+      })
+      .on("mouseleave", function () {
+        sideCrosshairH.style("display", "none");
+        sideDot.style("display", "none");
+        sideTooltip.style("display", "none");
+      });
 
     // --- Hover tooltip with crosshairs ---
     // Crosshair lines
