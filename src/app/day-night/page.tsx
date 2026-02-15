@@ -7,9 +7,15 @@ import {
   Paper,
   Typography,
   Box,
+  Dialog,
+  DialogContent,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import Globe from "@/components/day-night/Globe";
-import DaylightChart from "@/components/day-night/DaylightChart";
+import DaylightContourChart from "@/components/day-night/DaylightContourChart";
 import DateControls from "@/components/day-night/DateControls";
 
 export default function DayNightPage() {
@@ -17,6 +23,7 @@ export default function DayNightPage() {
   const [hourUTC, setHourUTC] = useState(12); // UTC正午から開始
   const [isPlaying, setIsPlaying] = useState(false);
   const animRef = useRef<NodeJS.Timeout | null>(null);
+  const [contourOpen, setContourOpen] = useState(false);
 
   const handlePlayToggle = useCallback(() => {
     setIsPlaying((prev) => !prev);
@@ -111,23 +118,83 @@ export default function DayNightPage() {
           </Paper>
         </Grid>
 
-        {/* 右カラム: グラフ + 解説 */}
+        {/* 右カラム: 等高線プロット */}
         <Grid size={{ xs: 12, md: 7 }}>
-          {/* 昼間時間グラフ */}
+          {/* 昼間時間の等高線プロット */}
           <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              緯度ごとの昼間の長さ（年間変化）
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 0 }}>
+                昼間時間の分布（緯度 × 月）
+              </Typography>
+              <Tooltip title="クリックで拡大表示">
+                <IconButton
+                  size="small"
+                  onClick={() => setContourOpen(true)}
+                  sx={{ color: "text.secondary" }}
+                >
+                  <ZoomInIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              縦軸に緯度、横軸に月をとり、昼間の長さを色で表した等高線図です。暖色ほど昼が長く、寒色ほど短いことを示します。
             </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <DaylightChart
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                cursor: "pointer",
+                borderRadius: 1,
+                transition: "box-shadow 0.2s",
+                "&:hover": {
+                  boxShadow: "0 0 0 2px rgba(29,78,216,0.3)",
+                },
+              }}
+              onClick={() => setContourOpen(true)}
+            >
+              <DaylightContourChart
                 dayOfYear={dayOfYear}
                 width={650}
-                height={320}
+                height={420}
               />
             </Box>
           </Paper>
         </Grid>
       </Grid>
+
+      {/* 拡大ダイアログ */}
+      <Dialog
+        open={contourOpen}
+        onClose={() => setContourOpen(false)}
+        maxWidth={false}
+        PaperProps={{
+          sx: {
+            width: "min(95vw, 1200px)",
+            maxHeight: "95vh",
+            p: 2,
+            borderRadius: 3,
+          },
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            昼間時間の分布（緯度 × 月）
+          </Typography>
+          <IconButton onClick={() => setContourOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+          縦軸に緯度、横軸に月をとり、昼間の長さを色で表した等高線図です。暖色ほど昼が長く、寒色ほど短いことを示します。
+        </Typography>
+        <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
+          <DaylightContourChart
+            dayOfYear={dayOfYear}
+            width={1100}
+            height={660}
+          />
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 }
