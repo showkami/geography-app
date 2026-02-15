@@ -46,9 +46,6 @@ export default function ProjectionsPage() {
 
   const handleProjectionChange = useCallback((id: string) => {
     setProjectionId(id);
-    setLambda(0);
-    setPhi(0);
-    setGamma(0);
   }, []);
 
   return (
