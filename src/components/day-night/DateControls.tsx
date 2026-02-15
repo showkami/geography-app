@@ -9,12 +9,12 @@ import {
   Chip,
   Tooltip,
 } from "@mui/material";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import PublicIcon from "@mui/icons-material/Public";
 import { doyToDate, MONTH_NAMES_JA, AXIAL_TILT_DEFAULT } from "@/lib/solar";
+import CircularSlider from "./CircularSlider";
 
 interface DateControlsProps {
   dayOfYear: number;
@@ -53,6 +53,21 @@ function getTiltDescription(tilt: number): { label: string; color: string } {
   return { label: "天王星のような横倒し状態", color: "#880e4f" };
 }
 
+/** 各月1日の通日 */
+const MONTH_START_DAYS = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
+
+/** 日付スライダー用の月ラベル */
+const DATE_LABELS = MONTH_START_DAYS.map((day, i) => ({
+  value: day,
+  label: `${i + 1}月`,
+}));
+
+/** 時刻スライダー用の時刻ラベル */
+const HOUR_LABELS = [0, 3, 6, 9, 12, 15, 18, 21].map((h) => ({
+  value: h,
+  label: `${h}`,
+}));
+
 export default function DateControls({
   dayOfYear,
   onDayChange,
@@ -70,76 +85,139 @@ export default function DateControls({
 
   return (
     <Box sx={{ p: 2 }}>
-      {/* 日付セクション */}
-      <Typography variant="subtitle2" gutterBottom color="text.secondary">
-        日付選択
-      </Typography>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-        <IconButton
-          onClick={onPlayToggle}
-          color="primary"
-          size="small"
-          sx={{ bgcolor: "primary.50", "&:hover": { bgcolor: "primary.100" } }}
+      {/* 日付・時刻セクション（丸型スライダー横並び） */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+        }}
+      >
+        {/* 日付スライダー */}
+        <Box
+          sx={{
+            flex: "1 1 0",
+            maxWidth: 200,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
-          {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-        </IconButton>
-        <IconButton onClick={onReset} size="small">
-          <RestartAltIcon />
-        </IconButton>
-        <Typography
-          variant="h6"
-          sx={{ minWidth: 100, textAlign: "center", fontWeight: 600 }}
-        >
-          {dateLabel}
-        </Typography>
-      </Box>
-
-      <Slider
-        value={dayOfYear}
-        onChange={(_, v) => onDayChange(v as number)}
-        min={1}
-        max={365}
-        step={1}
-      />
-
-      {/* 時刻セクション */}
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="subtitle2" gutterBottom color="text.secondary">
-          時刻選択（UTC）
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <AccessTimeIcon sx={{ color: "text.secondary", fontSize: 20 }} />
           <Typography
-            variant="h6"
-            sx={{ minWidth: 80, textAlign: "center", fontWeight: 600 }}
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontWeight: 600, fontSize: "0.72rem", mb: 0.5 }}
           >
-            {formatTime(hourUTC)}
+            日付選択
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            UTC
-          </Typography>
+          <CircularSlider
+            value={dayOfYear}
+            min={1}
+            max={365}
+            step={1}
+            onChange={onDayChange}
+            size={164}
+            color="#1976d2"
+            labels={DATE_LABELS}
+            fullCircleValue={365}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#1a1a1a",
+                lineHeight: 1.2,
+              }}
+            >
+              {dateLabel}
+            </div>
+            <div style={{ fontSize: 10, color: "#999", marginTop: 2 }}>
+              Day {dayOfYear}
+            </div>
+          </CircularSlider>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 0.5,
+              mt: 0.5,
+            }}
+          >
+            <Tooltip title={isPlaying ? "停止" : "日付を自動再生"}>
+              <IconButton
+                onClick={onPlayToggle}
+                color="primary"
+                size="small"
+                sx={{
+                  bgcolor: "primary.50",
+                  "&:hover": { bgcolor: "primary.100" },
+                }}
+              >
+                {isPlaying ? (
+                  <PauseIcon sx={{ fontSize: 18 }} />
+                ) : (
+                  <PlayArrowIcon sx={{ fontSize: 18 }} />
+                )}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="1月1日にリセット">
+              <IconButton onClick={onReset} size="small">
+                <RestartAltIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
-        <Slider
-          value={hourUTC}
-          onChange={(_, v) => onHourChange(v as number)}
-          min={0}
-          max={24}
-          step={0.5}
-          marks={[
-            { value: 0, label: "0時" },
-            { value: 6, label: "6時" },
-            { value: 12, label: "12時" },
-            { value: 18, label: "18時" },
-            { value: 24, label: "24時" },
-          ]}
-        />
+
+        {/* 時刻スライダー */}
+        <Box
+          sx={{
+            flex: "1 1 0",
+            maxWidth: 200,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontWeight: 600, fontSize: "0.72rem", mb: 0.5 }}
+          >
+            時刻（UTC）
+          </Typography>
+          <CircularSlider
+            value={hourUTC}
+            min={0}
+            max={24}
+            step={0.5}
+            onChange={onHourChange}
+            size={164}
+            color="#f57c00"
+            labels={HOUR_LABELS}
+            fullCircleValue={24}
+          >
+            <div
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#1a1a1a",
+                lineHeight: 1.2,
+              }}
+            >
+              {formatTime(hourUTC)}
+            </div>
+            <div style={{ fontSize: 10, color: "#999", marginTop: 2 }}>
+              UTC
+            </div>
+          </CircularSlider>
+        </Box>
       </Box>
 
       {/* 地軸の傾きセクション */}
       <Box
         sx={{
-          mt: 3,
-          pt: 2,
+          mt: 1.5,
+          pt: 1.5,
           borderTop: "1px solid",
           borderColor: "divider",
         }}
