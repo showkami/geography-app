@@ -236,7 +236,7 @@ export default function DateControls({
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
           <PublicIcon sx={{ color: "text.secondary", fontSize: 20 }} />
           <Typography variant="subtitle2" color="text.secondary">
-            地軸の傾き（シミュレーション）
+            地軸の傾き
           </Typography>
         </Box>
 

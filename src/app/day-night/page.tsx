@@ -57,9 +57,6 @@ export default function DayNightPage() {
         {/* 左カラム: 地球儀 + コントロール */}
         <Grid size={{ xs: 12, md: 5 }}>
           <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              地球儀（ドラッグで回転）
-            </Typography>
             <Box
               sx={{ display: "flex", justifyContent: "center" }}
             >
@@ -122,9 +119,6 @@ export default function DayNightPage() {
                 </IconButton>
               </Tooltip>
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              縦軸に緯度、横軸に月をとり、昼間の長さを色で表した等高線図です。暖色ほど昼が長く、寒色ほど短いことを示します。
-            </Typography>
             <Box
               sx={{
                 display: "flex",
@@ -163,9 +157,6 @@ export default function DayNightPage() {
                 </IconButton>
               </Tooltip>
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              縦軸に緯度、横軸に月をとり、正午の太陽高度を色で表した等高線図です。暖色ほど太陽が高く、寒色ほど低いことを示します。
-            </Typography>
             <Box
               sx={{
                 display: "flex",
@@ -212,9 +203,6 @@ export default function DayNightPage() {
             <CloseIcon />
           </IconButton>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          縦軸に緯度、横軸に月をとり、昼間の長さを色で表した等高線図です。暖色ほど昼が長く、寒色ほど短いことを示します。
-        </Typography>
         <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
           <DaylightContourChart
             dayOfYear={dayOfYear}
@@ -247,9 +235,6 @@ export default function DayNightPage() {
             <CloseIcon />
           </IconButton>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          縦軸に緯度、横軸に月をとり、正午の太陽高度を色で表した等高線図です。暖色ほど太陽が高く、寒色ほど低いことを示します。
-        </Typography>
         <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
           <SolarAltitudeContourChart
             dayOfYear={dayOfYear}
