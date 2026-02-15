@@ -16,6 +16,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import Globe from "@/components/day-night/Globe";
 import DaylightContourChart from "@/components/day-night/DaylightContourChart";
+import SolarAltitudeContourChart from "@/components/day-night/SolarAltitudeContourChart";
 import DateControls from "@/components/day-night/DateControls";
 
 export default function DayNightPage() {
@@ -24,6 +25,7 @@ export default function DayNightPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const animRef = useRef<NodeJS.Timeout | null>(null);
   const [contourOpen, setContourOpen] = useState(false);
+  const [altitudeOpen, setAltitudeOpen] = useState(false);
 
   const handlePlayToggle = useCallback(() => {
     setIsPlaying((prev) => !prev);
@@ -159,6 +161,46 @@ export default function DayNightPage() {
               />
             </Box>
           </Paper>
+
+          {/* 太陽南中高度の等高線プロット */}
+          <Paper elevation={2} sx={{ p: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Typography variant="h6" gutterBottom sx={{ mb: 0 }}>
+                太陽南中高度の分布（緯度 × 月）
+              </Typography>
+              <Tooltip title="クリックで拡大表示">
+                <IconButton
+                  size="small"
+                  onClick={() => setAltitudeOpen(true)}
+                  sx={{ color: "text.secondary" }}
+                >
+                  <ZoomInIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              縦軸に緯度、横軸に月をとり、正午の太陽高度を色で表した等高線図です。暖色ほど太陽が高く、寒色ほど低いことを示します。
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                cursor: "pointer",
+                borderRadius: 1,
+                transition: "box-shadow 0.2s",
+                "&:hover": {
+                  boxShadow: "0 0 0 2px rgba(29,78,216,0.3)",
+                },
+              }}
+              onClick={() => setAltitudeOpen(true)}
+            >
+              <SolarAltitudeContourChart
+                dayOfYear={dayOfYear}
+                width={650}
+                height={420}
+              />
+            </Box>
+          </Paper>
         </Grid>
       </Grid>
 
@@ -189,6 +231,40 @@ export default function DayNightPage() {
         </Typography>
         <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
           <DaylightContourChart
+            dayOfYear={dayOfYear}
+            width={1100}
+            height={660}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* 太陽南中高度 拡大ダイアログ */}
+      <Dialog
+        open={altitudeOpen}
+        onClose={() => setAltitudeOpen(false)}
+        maxWidth={false}
+        PaperProps={{
+          sx: {
+            width: "min(95vw, 1200px)",
+            maxHeight: "95vh",
+            p: 2,
+            borderRadius: 3,
+          },
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            太陽南中高度の分布（緯度 × 月）
+          </Typography>
+          <IconButton onClick={() => setAltitudeOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+          縦軸に緯度、横軸に月をとり、正午の太陽高度を色で表した等高線図です。暖色ほど太陽が高く、寒色ほど低いことを示します。
+        </Typography>
+        <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
+          <SolarAltitudeContourChart
             dayOfYear={dayOfYear}
             width={1100}
             height={660}

@@ -93,6 +93,19 @@ export const MONTH_NAMES_JA = [
   "12月",
 ];
 
+/**
+ * ある緯度・日における太陽の南中高度（度）を計算する
+ * 南中高度 = 90° - |緯度 - 太陽赤緯|
+ * @param latitude 緯度（度、北緯が正）
+ * @param dayOfYear 1月1日からの日数 (1-366)
+ * @returns 南中高度（度）。0未満の場合は0（太陽が昇らない）
+ */
+export function solarNoonAltitude(latitude: number, dayOfYear: number): number {
+  const decl = solarDeclination(dayOfYear);
+  const altitude = 90 - Math.abs(latitude - decl);
+  return Math.max(0, Math.min(90, altitude));
+}
+
 /** 代表的な緯度のプリセット */
 export const LATITUDE_PRESETS = [
   { label: "北極圏 (66.5°N)", value: 66.5 },
