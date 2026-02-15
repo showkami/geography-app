@@ -144,17 +144,6 @@ export default function CircularSlider({
 
   const onPointerUp = useCallback(() => setIsDragging(false), []);
 
-  const arcPath = useCallback(
-    (sa: number, ea: number): string => {
-      if (ea - sa < 0.01) return "";
-      const s = toXY(sa);
-      const e = toXY(ea);
-      const large = ea - sa > Math.PI ? 1 : 0;
-      return `M ${s.x} ${s.y} A ${RADIUS} ${RADIUS} 0 ${large} 1 ${e.x} ${e.y}`;
-    },
-    [toXY]
-  );
-
   const angle = valueToAngle(value);
   const thumb = toXY(angle);
 
@@ -185,18 +174,6 @@ export default function CircularSlider({
         stroke="#e8e8e8"
         strokeWidth={TRACK_W}
       />
-
-      {/* アクティブ円弧（進捗表示） */}
-      {angle > 0.01 && (
-        <path
-          d={arcPath(0, Math.min(angle, Math.PI * 2 - 0.01))}
-          fill="none"
-          stroke={color}
-          strokeWidth={TRACK_W}
-          strokeLinecap="round"
-          opacity={0.22}
-        />
-      )}
 
       {/* 目盛りとラベル */}
       {labels.map((l, i) => {
