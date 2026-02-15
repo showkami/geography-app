@@ -3,7 +3,7 @@ import "./globals.css";
 import ThemeRegistry from "./ThemeRegistry";
 
 export const metadata: Metadata = {
-  title: "GeoEdu - 地理教育ウェブアプリ",
+  title: "Geography App - 地理教育ウェブアプリ",
   description:
     "地軸の傾きと昼夜の長さの可視化、地図投影法の比較など、地理を視覚的に学べるウェブアプリ",
 };
