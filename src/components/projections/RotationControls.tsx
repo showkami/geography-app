@@ -5,10 +5,7 @@ import {
   Box,
   Slider,
   Typography,
-  Button,
-  Stack,
 } from "@mui/material";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 interface RotationControlsProps {
   lambda: number;
@@ -17,7 +14,6 @@ interface RotationControlsProps {
   onLambdaChange: (v: number) => void;
   onPhiChange: (v: number) => void;
   onGammaChange: (v: number) => void;
-  onReset: () => void;
 }
 
 export default function RotationControls({
@@ -27,25 +23,17 @@ export default function RotationControls({
   onLambdaChange,
   onPhiChange,
   onGammaChange,
-  onReset,
 }: RotationControlsProps) {
-  return (
-    <Box sx={{ p: 2 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-        <Typography variant="subtitle2" color="text.secondary">
-          投影の回転
-        </Typography>
-        <Button
-          size="small"
-          startIcon={<RestartAltIcon />}
-          onClick={onReset}
-        >
-          リセット
-        </Button>
-      </Stack>
+  const sliderSx = {
+    py: 0.5,
+    "& .MuiSlider-thumb": { width: 14, height: 14 },
+    "& .MuiSlider-rail, & .MuiSlider-track": { height: 3 },
+  };
 
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" gutterBottom>
+  return (
+    <Box sx={{ px: 2, pb: 1.5, pt: 0.5 }}>
+      <Box sx={{ mb: 0.5 }}>
+        <Typography variant="caption" color="text.secondary">
           λ（経度回転）: {lambda.toFixed(0)}°
         </Typography>
         <Slider
@@ -55,11 +43,12 @@ export default function RotationControls({
           max={180}
           step={1}
           size="small"
+          sx={sliderSx}
         />
       </Box>
 
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" gutterBottom>
+      <Box sx={{ mb: 0.5 }}>
+        <Typography variant="caption" color="text.secondary">
           φ（緯度回転）: {phi.toFixed(0)}°
         </Typography>
         <Slider
@@ -69,11 +58,12 @@ export default function RotationControls({
           max={90}
           step={1}
           size="small"
+          sx={sliderSx}
         />
       </Box>
 
-      <Box sx={{ mb: 1 }}>
-        <Typography variant="body2" gutterBottom>
+      <Box>
+        <Typography variant="caption" color="text.secondary">
           γ（ロール回転）: {gamma.toFixed(0)}°
         </Typography>
         <Slider
@@ -83,13 +73,9 @@ export default function RotationControls({
           max={180}
           step={1}
           size="small"
+          sx={sliderSx}
         />
       </Box>
-
-      <Typography variant="caption" color="text.secondary">
-        スライダーを動かすか、地図をドラッグして投影の中心を変更できます。
-        メルカトル図法でφやγを変えると、赤道以外の大円を中心にした地図が作れます。
-      </Typography>
     </Box>
   );
 }

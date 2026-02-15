@@ -9,13 +9,16 @@ import {
   Box,
   Switch,
   FormControlLabel,
-  Divider,
   Chip,
   Alert,
+  Button,
+  Divider,
 } from "@mui/material";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import ProjectionMap from "@/components/projections/ProjectionMap";
 import ProjectionSelector from "@/components/projections/ProjectionSelector";
 import RotationControls from "@/components/projections/RotationControls";
+import RotationGlobe from "@/components/projections/RotationGlobe";
 import { PROJECTIONS } from "@/lib/projections";
 
 export default function ProjectionsPage() {
@@ -50,7 +53,7 @@ export default function ProjectionsPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 3 }}>
         <Typography
           variant="h4"
           sx={{
@@ -71,57 +74,101 @@ export default function ProjectionsPage() {
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* 左サイドバー: 投影法選択 + 回転コントロール */}
-        <Grid size={{ xs: 12, md: 3 }}>
-          <Paper elevation={2} sx={{ mb: 2 }}>
-            <Box sx={{ p: 2, pb: 1 }}>
-              <Typography variant="h6" gutterBottom>
-                投影法を選択
+      {/* ====== 上段: 地球儀+回転コントロール | 地図+ティソー ====== */}
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        {/* 左: 地球儀 + 回転パラメータ（1枚のカードに統合） */}
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Paper
+            elevation={2}
+            sx={{
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {/* ヘッダー: タイトル + リセット */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                px: 2,
+                pt: 1.5,
+                pb: 0.5,
+              }}
+            >
+              <Typography variant="subtitle2" color="text.secondary">
+                投影の回転
               </Typography>
+              <Button
+                size="small"
+                startIcon={<RestartAltIcon />}
+                onClick={handleReset}
+              >
+                リセット
+              </Button>
             </Box>
-            <ProjectionSelector
-              selectedId={projectionId}
-              onSelect={handleProjectionChange}
-            />
-          </Paper>
 
-          <Paper elevation={2} sx={{ mb: 2 }}>
-            <RotationControls
-              lambda={lambda}
-              phi={phi}
-              gamma={gamma}
-              onLambdaChange={setLambda}
-              onPhiChange={setPhi}
-              onGammaChange={setGamma}
-              onReset={handleReset}
-            />
-          </Paper>
+            {/* 地球儀（残りの高さを埋める） */}
+            <Box
+              sx={{
+                flex: "1 1 auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                px: 2,
+                py: 1,
+                minHeight: 0,
+              }}
+            >
+              <RotationGlobe
+                lambda={lambda}
+                phi={phi}
+                gamma={gamma}
+                size={320}
+              />
+            </Box>
 
-          <Paper elevation={2} sx={{ p: 2 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={showTissot}
-                  onChange={(e) => setShowTissot(e.target.checked)}
-                  color="secondary"
-                />
-              }
-              label="ティソーの指示楕円を表示"
-            />
-            {showTissot && (
-              <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-                ピンクの円は、球面上では全て同じサイズの円です。
-                投影によって形やサイズが変わる様子が歪みを表しています。
-                正角図法では円のまま（サイズのみ変化）、正積図法では面積が一定（形が変化）です。
-              </Typography>
-            )}
+            <Divider />
+
+            {/* スライダー */}
+            <Box sx={{ flex: "none" }}>
+              <RotationControls
+                lambda={lambda}
+                phi={phi}
+                gamma={gamma}
+                onLambdaChange={setLambda}
+                onPhiChange={setPhi}
+                onGammaChange={setGamma}
+              />
+            </Box>
           </Paper>
         </Grid>
 
-        {/* メインエリア: 地図 + 情報 */}
-        <Grid size={{ xs: 12, md: 9 }}>
-          <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
+        {/* 右: 地図 + ティソートグル */}
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Paper elevation={2} sx={{ p: 2, height: "100%" }}>
+            {/* ティソートグル（右上） */}
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 0.5 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showTissot}
+                    onChange={(e) => setShowTissot(e.target.checked)}
+                    color="secondary"
+                    size="small"
+                  />
+                }
+                label={
+                  <Typography variant="body2" color="text.secondary">
+                    ティソーの指示楕円
+                  </Typography>
+                }
+              />
+            </Box>
+
+            {/* 地図本体 */}
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <ProjectionMap
                 projectionId={projectionId}
@@ -134,29 +181,61 @@ export default function ProjectionsPage() {
                 height={500}
               />
             </Box>
-          </Paper>
 
-          {/* 投影法情報パネル */}
+            {/* ティソー補足（表示時のみ） */}
+            {showTissot && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+                sx={{ mt: 1, textAlign: "center" }}
+              >
+                ピンクの円は球面上では全て同サイズ。正角図法では円のまま、正積図法では面積が一定。
+              </Typography>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* ====== 下段: 投影法選択 | 投影法説明 ====== */}
+      <Grid container spacing={2}>
+        {/* 左: 投影法選択 */}
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Paper elevation={2}>
+            <Box sx={{ p: 2, pb: 0 }}>
+              <Typography variant="h6" gutterBottom>
+                投影法を選択
+              </Typography>
+            </Box>
+            <ProjectionSelector
+              selectedId={projectionId}
+              onSelect={handleProjectionChange}
+            />
+          </Paper>
+        </Grid>
+
+        {/* 右: 投影法の説明 */}
+        <Grid size={{ xs: 12, md: 5 }}>
           {currentProj && (
-            <Paper elevation={2} sx={{ p: 3 }}>
+            <Paper elevation={2} sx={{ p: 2.5 }}>
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "baseline",
                   gap: 1,
-                  mb: 1.5,
+                  mb: 1,
                   flexWrap: "wrap",
                 }}
               >
-                <Typography variant="h5">
+                <Typography variant="h6" fontWeight={700}>
                   {currentProj.nameJa}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  ({currentProj.name})
+                  {currentProj.name}
                 </Typography>
               </Box>
 
-              <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
+              <Box sx={{ display: "flex", gap: 0.5, mb: 1.5, flexWrap: "wrap" }}>
                 <Chip
                   label={currentProj.categoryJa}
                   size="small"
@@ -174,17 +253,18 @@ export default function ProjectionsPage() {
                 ))}
               </Box>
 
-              <Divider sx={{ mb: 2 }} />
-
-              <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ lineHeight: 1.8 }}
+              >
                 {currentProj.description}
               </Typography>
 
               {projectionId === "mercator" && (phi !== 0 || gamma !== 0) && (
-                <Alert severity="info" sx={{ mt: 2 }}>
-                  φ（緯度回転）やγ（ロール回転）を変更すると、赤道以外の大円を投影の中心軸にした
-                  メルカトル図法になります。通常のメルカトル図法は赤道を中心に地球を切り開きますが、
-                  この操作により任意の大円を中心にした地図を作ることができます。
+                <Alert severity="info" sx={{ mt: 1.5 }} variant="outlined">
+                  φやγを変更すると、赤道以外の大円を中心軸にしたメルカトル図法になります。
+                  地球儀上の赤い大円が投影の中心軸です。
                 </Alert>
               )}
             </Paper>
