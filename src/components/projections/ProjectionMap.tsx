@@ -83,33 +83,27 @@ export default function ProjectionMap({
 
     const projection = projInfo.factory();
 
-    // スケールとセンターの調整
+    // 回転を設定してからfitExtentで自動スケーリング
     projection
       .rotate([lambda, phi, gamma])
-      .translate([width / 2, height / 2])
       .precision(0.1);
 
-    // 投影法ごとにスケールを調整
-    const scaleFactor: Record<string, number> = {
-      mercator: 110,
-      transverseMercator: 110,
-      equirectangular: 120,
-      miller: 110,
-      albers: 120,
-      conicConformal: 100,
-      orthographic: 200,
-      stereographic: 130,
-      gnomonic: 180,
-      mollweide: 140,
-      robinson: 140,
-      sinusoidal: 130,
-      aitoff: 140,
-      winkel3: 150,
-      naturalEarth: 140,
+    // 球面を無限大に投影する投影法には clipAngle を設定して範囲を制限
+    const clipAngleDefaults: Record<string, number> = {
+      stereographic: 90,
+      conicConformal: 90,
     };
+    if (clipAngleDefaults[projectionId]) {
+      projection.clipAngle(clipAngleDefaults[projectionId]);
+    }
 
-    const scale = scaleFactor[projectionId] || 130;
-    projection.scale(scale);
+    // パディング付きでSVG領域に収まるよう自動フィット
+    const padding = 10;
+    const sphere = { type: "Sphere" } as d3.GeoPermissibleObjects;
+    projection.fitExtent(
+      [[padding, padding], [width - padding, height - padding]],
+      sphere
+    );
 
     const path = d3.geoPath(projection);
 
