@@ -5,6 +5,7 @@ import * as d3 from "d3";
 import * as topojson from "topojson-client";
 import {
   CELLS,
+  PRESSURE_ZONES,
   getCellBoundaries,
   monthToDayOfYear,
   type CellId,
@@ -27,18 +28,37 @@ interface DrawProps {
   showWindArrows: boolean;
 }
 
-const ARROW_CONFIG: {
+interface ArrowSpec {
   lat: number;
-  bearingNH: number;
-  bearingSH: number;
+  bearing: number;
   cellId: CellId;
-}[] = [
-  { lat: 15, bearingNH: 225, bearingSH: 315, cellId: "hadley" },
-  { lat: 45, bearingNH: 50, bearingSH: 130, cellId: "ferrel" },
-  { lat: 75, bearingNH: 225, bearingSH: 315, cellId: "polar" },
-];
+}
 
-const ARROW_LONS = [0, 60, 120, 180, -120, -60];
+function buildArrowSpecs(boundaries: {
+  itczLat: number;
+  nhSubtropicalLat: number;
+  shSubtropicalLat: number;
+  nhSubpolarLat: number;
+  shSubpolarLat: number;
+}): ArrowSpec[] {
+  const { itczLat, nhSubtropicalLat, shSubtropicalLat, nhSubpolarLat, shSubpolarLat } = boundaries;
+  return [
+    // NH trade winds (ITCZ → subtropical high midpoint)
+    { lat: (itczLat + nhSubtropicalLat) / 2, bearing: 225, cellId: "hadley" },
+    // SH trade winds
+    { lat: (itczLat + shSubtropicalLat) / 2, bearing: 315, cellId: "hadley" },
+    // NH westerlies (subtropical high → subpolar low midpoint)
+    { lat: (nhSubtropicalLat + nhSubpolarLat) / 2, bearing: 50, cellId: "ferrel" },
+    // SH westerlies
+    { lat: (shSubtropicalLat + shSubpolarLat) / 2, bearing: 130, cellId: "ferrel" },
+    // NH polar easterlies (subpolar low → pole midpoint)
+    { lat: (nhSubpolarLat + 90) / 2, bearing: 225, cellId: "polar" },
+    // SH polar easterlies
+    { lat: (shSubpolarLat + -90) / 2, bearing: 315, cellId: "polar" },
+  ];
+}
+
+const ARROW_LONS = [0, 45, 90, 135, 180, -135, -90, -45];
 
 function createLatBand(lat1: number, lat2: number): GeoJSON.Polygon {
   const n = 72;
@@ -135,29 +155,33 @@ export default function WindPatternGlobe({
         .attr("cx", width / 2)
         .attr("cy", height / 2)
         .attr("r", projection.scale()!)
-        .attr("fill", "#e3f2fd")
-        .attr("stroke", "#90caf9")
-        .attr("stroke-width", 1.5);
+        .attr("fill", "#e8f4fd")
+        .attr("stroke", "none");
 
-      // Graticule
+      // Graticule (subtle)
       svg
         .append("path")
-        .datum(d3.geoGraticule()())
+        .datum(d3.geoGraticule().step([30, 30])())
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#bbdefb")
-        .attr("stroke-width", 0.4);
+        .attr("stroke", "#c5dff0")
+        .attr("stroke-width", 0.3);
 
       // Pressure zone bands
       if (props.showPressureZones) {
+        const bandWidth = 8;
         const bands = [
-          { lat1: itczLat - 5, lat2: itczLat + 5, color: "#ef5350", op: 0.15 },
-          { lat1: nhSubtropicalLat - 5, lat2: nhSubtropicalLat + 5, color: "#ff9800", op: 0.10 },
-          { lat1: shSubtropicalLat - 5, lat2: shSubtropicalLat + 5, color: "#ff9800", op: 0.10 },
-          { lat1: nhSubpolarLat - 5, lat2: nhSubpolarLat + 5, color: "#42a5f5", op: 0.10 },
-          { lat1: shSubpolarLat - 5, lat2: shSubpolarLat + 5, color: "#42a5f5", op: 0.10 },
-          { lat1: 80, lat2: 90, color: "#ab47bc", op: 0.10 },
-          { lat1: -90, lat2: -80, color: "#ab47bc", op: 0.10 },
+          // ITCZ (low pressure)
+          { lat1: itczLat - bandWidth, lat2: itczLat + bandWidth, color: PRESSURE_ZONES[0].color, op: 0.22 },
+          // Subtropical highs
+          { lat1: nhSubtropicalLat - bandWidth, lat2: nhSubtropicalLat + bandWidth, color: PRESSURE_ZONES[1].color, op: 0.18 },
+          { lat1: shSubtropicalLat - bandWidth, lat2: shSubtropicalLat + bandWidth, color: PRESSURE_ZONES[1].color, op: 0.18 },
+          // Subpolar lows
+          { lat1: nhSubpolarLat - bandWidth, lat2: nhSubpolarLat + bandWidth, color: PRESSURE_ZONES[2].color, op: 0.18 },
+          { lat1: shSubpolarLat - bandWidth, lat2: shSubpolarLat + bandWidth, color: PRESSURE_ZONES[2].color, op: 0.18 },
+          // Polar highs
+          { lat1: 75, lat2: 90, color: PRESSURE_ZONES[3].color, op: 0.18 },
+          { lat1: -90, lat2: -75, color: PRESSURE_ZONES[3].color, op: 0.18 },
         ];
         bands.forEach((b) => {
           svg
@@ -168,6 +192,25 @@ export default function WindPatternGlobe({
             .attr("opacity", b.op)
             .attr("stroke", "none");
         });
+
+        // Boundary lines at pressure zone latitudes
+        const boundaryLines = [
+          { lat: nhSubtropicalLat, color: PRESSURE_ZONES[1].color, label: "亜熱帯高圧帯" },
+          { lat: shSubtropicalLat, color: PRESSURE_ZONES[1].color, label: "" },
+          { lat: nhSubpolarLat, color: PRESSURE_ZONES[2].color, label: "亜極低圧帯" },
+          { lat: shSubpolarLat, color: PRESSURE_ZONES[2].color, label: "" },
+        ];
+        boundaryLines.forEach((bl) => {
+          svg
+            .append("path")
+            .datum(d3.geoCircle().center([0, 90]).radius(90 - bl.lat)())
+            .attr("d", path)
+            .attr("fill", "none")
+            .attr("stroke", bl.color)
+            .attr("stroke-width", 1.0)
+            .attr("stroke-dasharray", "3,4")
+            .attr("opacity", 0.5);
+        });
       }
 
       // Land
@@ -175,9 +218,10 @@ export default function WindPatternGlobe({
         .append("path")
         .datum(land)
         .attr("d", path)
-        .attr("fill", "#81c784")
-        .attr("stroke", "#388e3c")
-        .attr("stroke-width", 0.5);
+        .attr("fill", "#a5d6a7")
+        .attr("stroke", "#4caf50")
+        .attr("stroke-width", 0.5)
+        .attr("opacity", 0.85);
 
       // Equator
       svg
@@ -185,9 +229,9 @@ export default function WindPatternGlobe({
         .datum(d3.geoCircle().center([0, 90]).radius(90)())
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#bdbdbd")
-        .attr("stroke-width", 0.8)
-        .attr("stroke-dasharray", "4,3");
+        .attr("stroke", "#78909c")
+        .attr("stroke-width", 1.2)
+        .attr("stroke-dasharray", "6,4");
 
       // ITCZ line
       svg
@@ -198,82 +242,97 @@ export default function WindPatternGlobe({
         .attr("d", path)
         .attr("fill", "none")
         .attr("stroke", "#ef5350")
-        .attr("stroke-width", 1.8)
-        .attr("stroke-dasharray", "5,3");
+        .attr("stroke-width", 2.5)
+        .attr("stroke-dasharray", "6,3");
 
       // Wind arrows
       if (props.showWindArrows) {
-        svg
-          .append("defs")
-          .append("marker")
-          .attr("id", "globe-wind-arrow")
-          .attr("viewBox", "0 0 6 4")
-          .attr("refX", 5)
-          .attr("refY", 2)
-          .attr("markerWidth", 5)
-          .attr("markerHeight", 3)
-          .attr("orient", "auto")
-          .append("polygon")
-          .attr("points", "0,0 6,2 0,4")
-          .attr("fill", "#546e7a");
+        const defs = svg.append("defs");
 
-        ARROW_CONFIG.forEach((cfg) => {
-          const cell = CELLS.find((c) => c.id === cfg.cellId)!;
+        CELLS.forEach((cell) => {
+          defs
+            .append("marker")
+            .attr("id", `globe-arrow-${cell.id}`)
+            .attr("viewBox", "0 0 8 6")
+            .attr("refX", 7)
+            .attr("refY", 3)
+            .attr("markerWidth", 7)
+            .attr("markerHeight", 5)
+            .attr("orient", "auto")
+            .append("polygon")
+            .attr("points", "0,0.5 8,3 0,5.5")
+            .attr("fill", cell.color);
+        });
+
+        const arrowSpecs = buildArrowSpecs({
+          itczLat, nhSubtropicalLat, shSubtropicalLat,
+          nhSubpolarLat, shSubpolarLat,
+        });
+        const arrowLen = 14;
+
+        arrowSpecs.forEach((spec) => {
+          const cell = CELLS.find((c) => c.id === spec.cellId)!;
           const isActive =
             !props.highlightedCell ||
-            props.highlightedCell === cfg.cellId;
+            props.highlightedCell === spec.cellId;
 
           ARROW_LONS.forEach((lon) => {
-            // NH
-            const nhEnd = moveAlongBearing(
-              lon,
-              cfg.lat,
-              cfg.bearingNH,
-              6
-            );
-            if (
-              projection([lon, cfg.lat]) &&
-              projection(nhEnd)
-            ) {
+            const end = moveAlongBearing(lon, spec.lat, spec.bearing, arrowLen);
+            const startPt = projection([lon, spec.lat]);
+            const endPt = projection(end);
+            if (startPt && endPt) {
               svg
                 .append("path")
                 .datum({
                   type: "LineString" as const,
-                  coordinates: [[lon, cfg.lat], nhEnd],
+                  coordinates: [[lon, spec.lat], end],
                 })
                 .attr("d", path)
                 .attr("fill", "none")
                 .attr("stroke", cell.color)
-                .attr("stroke-width", 1.3)
-                .attr("marker-end", "url(#globe-wind-arrow)")
-                .attr("opacity", isActive ? 0.55 : 0.12);
-            }
-
-            // SH
-            const shEnd = moveAlongBearing(
-              lon,
-              -cfg.lat,
-              cfg.bearingSH,
-              6
-            );
-            if (
-              projection([lon, -cfg.lat]) &&
-              projection(shEnd)
-            ) {
-              svg
-                .append("path")
-                .datum({
-                  type: "LineString" as const,
-                  coordinates: [[lon, -cfg.lat], shEnd],
-                })
-                .attr("d", path)
-                .attr("fill", "none")
-                .attr("stroke", cell.color)
-                .attr("stroke-width", 1.3)
-                .attr("marker-end", "url(#globe-wind-arrow)")
-                .attr("opacity", isActive ? 0.55 : 0.12);
+                .attr("stroke-width", isActive ? 2.2 : 1.0)
+                .attr("marker-end", `url(#globe-arrow-${cell.id})`)
+                .attr("opacity", isActive ? 0.75 : 0.15)
+                .attr("stroke-linecap", "round");
             }
           });
+        });
+      }
+
+      // On-globe labels for pressure zones & ITCZ
+      if (props.showPressureZones) {
+        const labelLon = -projection.rotate()[0];
+        const labelData: { lat: number; text: string; color: string; bold?: boolean }[] = [
+          { lat: itczLat, text: "ITCZ", color: "#c62828", bold: true },
+          { lat: nhSubtropicalLat, text: "高", color: "#e65100" },
+          { lat: shSubtropicalLat, text: "高", color: "#e65100" },
+          { lat: nhSubpolarLat, text: "低", color: "#1565c0" },
+          { lat: shSubpolarLat, text: "低", color: "#1565c0" },
+          { lat: 85, text: "高", color: "#7b1fa2" },
+          { lat: -85, text: "高", color: "#7b1fa2" },
+        ];
+
+        labelData.forEach((ld) => {
+          const pt = projection([labelLon, ld.lat]);
+          if (!pt) return;
+          const dist = Math.sqrt(
+            (pt[0] - width / 2) ** 2 + (pt[1] - height / 2) ** 2
+          );
+          if (dist > projection.scale()! * 0.95) return;
+
+          svg
+            .append("text")
+            .attr("x", pt[0])
+            .attr("y", pt[1])
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")
+            .attr("font-size", ld.bold ? 12 : 10)
+            .attr("font-weight", ld.bold ? 700 : 600)
+            .attr("fill", ld.color)
+            .attr("stroke", "white")
+            .attr("stroke-width", 2.5)
+            .attr("paint-order", "stroke")
+            .text(ld.text);
         });
       }
 
@@ -287,14 +346,14 @@ export default function WindPatternGlobe({
         .attr("stroke", "#455a64")
         .attr("stroke-width", 1.5);
 
-      // Zonal-mean note (avoid over-interpreting longitude variability)
+      // Note
       svg
         .append("text")
         .attr("x", width / 2)
-        .attr("y", height - 8)
+        .attr("y", height - 6)
         .attr("text-anchor", "middle")
-        .attr("font-size", 10)
-        .attr("fill", "#78909c")
+        .attr("font-size", 9)
+        .attr("fill", "#90a4ae")
         .text("※ 気圧帯・ITCZは帯状平均（経度差は省略）");
     },
     [width, height]

@@ -3,7 +3,6 @@
 import React from "react";
 import {
   Box,
-  Slider,
   Typography,
   IconButton,
   Chip,
@@ -15,6 +14,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { CELLS, MONTH_NAMES_JA, type CellId, type TopicId } from "@/lib/atmospheric";
+import CircularSlider from "@/components/common/CircularSlider";
 
 interface CirculationControlsProps {
   month: number;
@@ -32,10 +32,12 @@ interface CirculationControlsProps {
   onShowWindArrowsChange: (show: boolean) => void;
 }
 
-const MONTH_MARKS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => ({
-  value: m,
-  label: m % 3 === 1 ? MONTH_NAMES_JA[m - 1] : "",
-}));
+const SEASON_QUADRANT_MARKS = [
+  { value: 1, label: "冬至" },
+  { value: 4, label: "春分" },
+  { value: 7, label: "夏至" },
+  { value: 10, label: "秋分" },
+];
 
 const TOPIC_CHIPS: { id: TopicId; label: string; color: string }[] = [
   ...CELLS.map((c) => ({ id: c.id as TopicId, label: c.name, color: c.color })),
@@ -78,41 +80,62 @@ export default function CirculationControls({
           </Typography>
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Slider
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 0.5,
+          }}
+        >
+          <CircularSlider
             value={month}
-            onChange={(_, v) => onMonthChange(v as number)}
+            onChange={(v) => onMonthChange(Math.round(v))}
             min={1}
             max={12}
             step={1}
-            marks={MONTH_MARKS}
-            sx={{
-              flex: 1,
-              "& .MuiSlider-markLabel": { fontSize: "0.7rem" },
-            }}
-          />
-          <Tooltip title={isPlaying ? "停止" : "季節を自動再生"}>
-            <IconButton
-              onClick={onPlayToggle}
-              color="primary"
-              size="small"
-              sx={{
-                bgcolor: "primary.50",
-                "&:hover": { bgcolor: "primary.100" },
+            size={180}
+            color="#1976d2"
+            labels={SEASON_QUADRANT_MARKS}
+            fullCircleValue={12}
+            startValue={1}
+          >
+            <div
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#1a1a1a",
+                lineHeight: 1.2,
               }}
             >
-              {isPlaying ? (
-                <PauseIcon sx={{ fontSize: 20 }} />
-              ) : (
-                <PlayArrowIcon sx={{ fontSize: 20 }} />
-              )}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="1月にリセット">
-            <IconButton onClick={onReset} size="small">
-              <RestartAltIcon sx={{ fontSize: 20 }} />
-            </IconButton>
-          </Tooltip>
+              {MONTH_NAMES_JA[month - 1]}
+            </div>
+            <div style={{ fontSize: 10, color: "#999", marginTop: 2 }}>月（季節）</div>
+          </CircularSlider>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Tooltip title={isPlaying ? "停止" : "季節を自動再生"}>
+              <IconButton
+                onClick={onPlayToggle}
+                color="primary"
+                size="small"
+                sx={{
+                  bgcolor: "primary.50",
+                  "&:hover": { bgcolor: "primary.100" },
+                }}
+              >
+                {isPlaying ? (
+                  <PauseIcon sx={{ fontSize: 20 }} />
+                ) : (
+                  <PlayArrowIcon sx={{ fontSize: 20 }} />
+                )}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="1月にリセット">
+              <IconButton onClick={onReset} size="small">
+                <RestartAltIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
 

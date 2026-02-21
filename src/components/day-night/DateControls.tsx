@@ -14,7 +14,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import PublicIcon from "@mui/icons-material/Public";
 import { doyToDate, MONTH_NAMES_JA, AXIAL_TILT_DEFAULT } from "@/lib/solar";
-import CircularSlider from "./CircularSlider";
+import CircularSlider from "@/components/common/CircularSlider";
 
 interface DateControlsProps {
   dayOfYear: number;

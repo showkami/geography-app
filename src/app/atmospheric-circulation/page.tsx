@@ -147,7 +147,7 @@ export default function AtmosphericCirculationPage() {
               sx={{
                 mt: 1,
                 display: "flex",
-                gap: 1,
+                gap: 1.5,
                 flexWrap: "wrap",
                 justifyContent: "center",
               }}
@@ -155,10 +155,21 @@ export default function AtmosphericCirculationPage() {
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <Box
                   sx={{
-                    width: 12,
-                    height: 2,
-                    bgcolor: "#bdbdbd",
-                    borderTop: "1px dashed #bdbdbd",
+                    width: 16,
+                    height: 0,
+                    borderTop: "2.5px dashed #ef5350",
+                  }}
+                />
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "#ef5350" }}>
+                  ITCZ
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 0,
+                    borderTop: "1.5px dashed #78909c",
                   }}
                 />
                 <Typography variant="caption">赤道</Typography>
@@ -167,24 +178,43 @@ export default function AtmosphericCirculationPage() {
                 <Box
                   sx={{
                     width: 12,
-                    height: 2,
-                    bgcolor: "#ef5350",
-                    borderTop: "2px dashed #ef5350",
+                    height: 8,
+                    bgcolor: "#ef535035",
+                    border: "1px solid #ef535060",
+                    borderRadius: 0.3,
                   }}
                 />
-                <Typography variant="caption">ITCZ</Typography>
+                <Typography variant="caption">低圧帯</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <Box
                   sx={{
                     width: 12,
                     height: 8,
-                    bgcolor: "#81c784",
-                    border: "0.5px solid #388e3c",
+                    bgcolor: "#ff980030",
+                    border: "1px solid #ff980060",
+                    borderRadius: 0.3,
                   }}
                 />
-                <Typography variant="caption">陸地</Typography>
+                <Typography variant="caption">高圧帯</Typography>
               </Box>
+              {CELLS.map((cell) => (
+                <Box
+                  key={cell.id}
+                  sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                >
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 0,
+                      borderTop: `2.5px solid ${cell.color}`,
+                    }}
+                  />
+                  <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>
+                    {cell.surfaceWind.split("（")[0]}
+                  </Typography>
+                </Box>
+              ))}
             </Box>
           </Paper>
         </Grid>
