@@ -9,12 +9,14 @@ import {
 } from "@mui/material";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import MapIcon from "@mui/icons-material/Map";
+import AirIcon from "@mui/icons-material/Air";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const tabItems = [
   { label: "昼夜の長さと地軸", href: "/day-night", icon: <WbSunnyIcon /> },
   { label: "投影法エクスプローラー", href: "/projections", icon: <MapIcon /> },
+  { label: "大気大循環", href: "/atmospheric-circulation", icon: <AirIcon /> },
 ];
 
 export default function Navigation() {
