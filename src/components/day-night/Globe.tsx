@@ -193,11 +193,12 @@ export default function Globe({
     [width, height]
   );
 
-  // プロジェクションとドラッグの初期化（width/height変更時のみ再実行）
+  const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
+
+  // プロジェクション初期化（width/height変更時のみ再実行）
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const svg = d3.select(svgRef.current);
     const projection = d3
       .geoOrthographic()
       .scale(width / 2.2)
@@ -206,21 +207,23 @@ export default function Globe({
       .rotate(rotationRef.current);
 
     projectionRef.current = projection;
+  }, [width, height]);
 
-    // ドラッグで地球儀を回転
-    const drag = d3.drag<SVGSVGElement, unknown>().on("drag", (event) => {
+  const handleDrag = useCallback(
+    (dx: number, dy: number) => {
+      const projection = projectionRef.current;
+      if (!projection || !svgRef.current || !worldDataRef.current) return;
       const rotate = projection.rotate();
-      const k = 0.5; // 感度
+      const k = 0.5;
       const newRotation: [number, number, number] = [
-        rotate[0] + event.dx * k,
-        rotate[1] - event.dy * k,
+        rotate[0] + dx * k,
+        rotate[1] - dy * k,
         rotate[2],
       ];
       projection.rotate(newRotation);
       rotationRef.current = newRotation;
 
-      // ドラッグ時はrefから最新のprops値を読む
-      if (!worldDataRef.current) return;
+      const svg = d3.select(svgRef.current);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const world = worldDataRef.current as any;
       const land = topojson.feature(world, world.objects.land);
@@ -234,10 +237,32 @@ export default function Globe({
         hourUTCRef.current,
         axialTiltRef.current
       );
-    });
+    },
+    [drawGlobe]
+  );
 
-    svg.call(drag);
-  }, [width, height, drawGlobe]);
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      svgRef.current?.setPointerCapture(e.pointerId);
+      lastPointerRef.current = { x: e.clientX, y: e.clientY };
+    },
+    []
+  );
+
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!lastPointerRef.current) return;
+      const dx = e.clientX - lastPointerRef.current.x;
+      const dy = e.clientY - lastPointerRef.current.y;
+      lastPointerRef.current = { x: e.clientX, y: e.clientY };
+      handleDrag(dx, dy);
+    },
+    [handleDrag]
+  );
+
+  const onPointerUp = useCallback(() => {
+    lastPointerRef.current = null;
+  }, []);
 
   // dayOfYear/hourUTC変更時のレンダリング（プロジェクションは再利用）
   useEffect(() => {
@@ -262,8 +287,12 @@ export default function Globe({
       ref={svgRef}
       width={width}
       height={height}
-      style={{ cursor: "grab", maxWidth: "100%", height: "auto" }}
+      style={{ cursor: "grab", maxWidth: "100%", height: "auto", touchAction: "none" }}
       viewBox={`0 0 ${width} ${height}`}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
     />
   );
 }

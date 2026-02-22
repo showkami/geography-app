@@ -359,10 +359,11 @@ export default function WindPatternGlobe({
     [width, height]
   );
 
-  // Projection + drag setup
+  const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Projection setup
   useEffect(() => {
     if (!svgRef.current) return;
-    const svg = d3.select(svgRef.current);
     const projection = d3
       .geoOrthographic()
       .scale(width / 2.2)
@@ -370,33 +371,59 @@ export default function WindPatternGlobe({
       .clipAngle(90)
       .rotate(rotationRef.current);
     projectionRef.current = projection;
+  }, [width, height]);
 
-    const drag = d3
-      .drag<SVGSVGElement, unknown>()
-      .on("drag", (event) => {
-        const rotate = projection.rotate();
-        const k = 0.5;
-        const newRotation: [number, number, number] = [
-          rotate[0] + event.dx * k,
-          rotate[1] - event.dy * k,
-          rotate[2],
-        ];
-        projection.rotate(newRotation);
-        rotationRef.current = newRotation;
-        if (!worldDataRef.current) return;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const world = worldDataRef.current as any;
-        const land = topojson.feature(world, world.objects.land);
-        drawGlobe(
-          svg,
-          projection,
-          d3.geoPath(projection),
-          land,
-          propsRef.current
-        );
-      });
-    svg.call(drag);
-  }, [width, height, drawGlobe]);
+  const handleDrag = useCallback(
+    (dx: number, dy: number) => {
+      const projection = projectionRef.current;
+      if (!projection || !svgRef.current || !worldDataRef.current) return;
+      const rotate = projection.rotate();
+      const k = 0.5;
+      const newRotation: [number, number, number] = [
+        rotate[0] + dx * k,
+        rotate[1] - dy * k,
+        rotate[2],
+      ];
+      projection.rotate(newRotation);
+      rotationRef.current = newRotation;
+
+      const svg = d3.select(svgRef.current);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const world = worldDataRef.current as any;
+      const land = topojson.feature(world, world.objects.land);
+      drawGlobe(
+        svg,
+        projection,
+        d3.geoPath(projection),
+        land,
+        propsRef.current
+      );
+    },
+    [drawGlobe]
+  );
+
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      svgRef.current?.setPointerCapture(e.pointerId);
+      lastPointerRef.current = { x: e.clientX, y: e.clientY };
+    },
+    []
+  );
+
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!lastPointerRef.current) return;
+      const dx = e.clientX - lastPointerRef.current.x;
+      const dy = e.clientY - lastPointerRef.current.y;
+      lastPointerRef.current = { x: e.clientX, y: e.clientY };
+      handleDrag(dx, dy);
+    },
+    [handleDrag]
+  );
+
+  const onPointerUp = useCallback(() => {
+    lastPointerRef.current = null;
+  }, []);
 
   // Re-render on prop changes
   useEffect(() => {
@@ -433,8 +460,12 @@ export default function WindPatternGlobe({
       ref={svgRef}
       width={width}
       height={height}
-      style={{ cursor: "grab", maxWidth: "100%", height: "auto" }}
+      style={{ cursor: "grab", maxWidth: "100%", height: "auto", touchAction: "none" }}
       viewBox={`0 0 ${width} ${height}`}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
     />
   );
 }
