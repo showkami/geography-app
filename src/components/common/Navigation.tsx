@@ -46,6 +46,9 @@ export default function Navigation() {
           value={tabValue}
           textColor="primary"
           indicatorColor="primary"
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
           sx={{
             minHeight: 48,
             "& .MuiTab-root": {
