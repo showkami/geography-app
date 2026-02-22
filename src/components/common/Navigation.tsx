@@ -11,20 +11,24 @@ import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import MapIcon from "@mui/icons-material/Map";
 import AirIcon from "@mui/icons-material/Air";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const tabItems = [
-  { label: "昼夜の長さと地軸", href: "/day-night", icon: <WbSunnyIcon /> },
-  { label: "投影法エクスプローラー", href: "/projections", icon: <MapIcon /> },
+  { label: "地軸の傾き", href: "/day-night", icon: <WbSunnyIcon /> },
+  { label: "地図投影法", href: "/projections", icon: <MapIcon /> },
   { label: "大気大循環", href: "/atmospheric-circulation", icon: <AirIcon /> },
 ];
 
 export default function Navigation() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  // 現在のパスに対応するタブのインデックスを取得
   const currentTab = tabItems.findIndex((item) => pathname.startsWith(item.href));
   const tabValue = currentTab >= 0 ? currentTab : 0;
+
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    router.push(tabItems[newValue].href);
+  };
 
   return (
     <AppBar
@@ -44,6 +48,7 @@ export default function Navigation() {
       >
         <Tabs
           value={tabValue}
+          onChange={handleTabChange}
           textColor="primary"
           indicatorColor="primary"
           variant="scrollable"
