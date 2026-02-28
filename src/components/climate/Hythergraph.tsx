@@ -11,10 +11,10 @@ interface HythergraphProps {
 
 const MARGIN = { top: 20, right: 30, bottom: 50, left: 60 };
 const THRESHOLD_TEMPS = [
-  { value: -3, label: "-3°C (C/D境界)", color: "#42a5f5" },
-  { value: 10, label: "10°C (D/E境界)", color: "#66bb6a" },
-  { value: 18, label: "18°C (A/C境界)", color: "#ffa726" },
-  { value: 22, label: "22°C (a/b境界)", color: "#ef5350" },
+  { value: -3, label: "-3°C (C/D境界)", color: "#42a5f5", tip: "最寒月平均気温 -3°C\n温帯(C)と冷帯(D)の境界" },
+  { value: 10, label: "10°C (D/E境界)", color: "#66bb6a", tip: "最暖月平均気温 10°C\n冷帯(D)と寒帯(E)の境界\nこれ未満はツンドラ(ET)または氷雪(EF)" },
+  { value: 18, label: "18°C (A/C境界)", color: "#ffa726", tip: "最寒月平均気温 18°C\n熱帯(A)と温帯(C)の境界" },
+  { value: 22, label: "22°C (a/b境界)", color: "#ef5350", tip: "最暖月平均気温 22°C\na(暑夏)と b(温暖夏)の境界" },
 ];
 
 const ZONE_BANDS = [
@@ -107,7 +107,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       }
     }
 
-    // 閾値線
+    // 閾値線（気温）
     for (const th of THRESHOLD_TEMPS) {
       const xPos = x(th.value);
       if (xPos >= 0 && xPos <= innerW) {
@@ -118,10 +118,31 @@ export default function Hythergraph({ cities }: HythergraphProps) {
           .attr("stroke-width", 1)
           .attr("stroke-dasharray", "4,3")
           .attr("opacity", 0.4);
+        // ホバー用の透明な太線
+        g.append("line")
+          .attr("x1", xPos).attr("y1", 0)
+          .attr("x2", xPos).attr("y2", innerH)
+          .attr("stroke", "transparent")
+          .attr("stroke-width", 12)
+          .style("cursor", "pointer")
+          .on("mouseenter", (event) => {
+            tooltip
+              .style("opacity", 1)
+              .style("left", `${event.offsetX + 12}px`)
+              .style("top", `${event.offsetY - 10}px`)
+              .html(`<strong style="color:${th.color}">${th.label}</strong><br/>${th.tip.replace(/\n/g, "<br/>")}`);
+          })
+          .on("mousemove", (event) => {
+            tooltip
+              .style("left", `${event.offsetX + 12}px`)
+              .style("top", `${event.offsetY - 10}px`);
+          })
+          .on("mouseleave", () => { tooltip.style("opacity", 0); });
       }
     }
 
     // 60mm 降水閾値線
+    const precipTip60 = "月降水量 60mm\n熱帯雨林気候(Af)の判定基準\n最少雨月が60mm以上なら熱帯雨林気候";
     const y60 = y(60);
     if (y60 >= 0 && y60 <= innerH) {
       g.append("line")
@@ -131,23 +152,42 @@ export default function Hythergraph({ cities }: HythergraphProps) {
         .attr("stroke-width", 1)
         .attr("stroke-dasharray", "4,3")
         .attr("opacity", 0.4);
-      g.append("text")
-        .attr("x", innerW - 2)
-        .attr("y", y60 - 3)
-        .attr("text-anchor", "end")
-        .attr("fill", "#22d3ee")
-        .attr("font-size", 9)
-        .attr("opacity", 0.6)
-        .text("60mm");
+      // ホバー用透明太線
+      g.append("line")
+        .attr("x1", 0).attr("y1", y60)
+        .attr("x2", innerW).attr("y2", y60)
+        .attr("stroke", "transparent")
+        .attr("stroke-width", 12)
+        .style("cursor", "pointer")
+        .on("mouseenter", (event) => {
+          tooltip
+            .style("opacity", 1)
+            .style("left", `${event.offsetX + 12}px`)
+            .style("top", `${event.offsetY - 10}px`)
+            .html(`<strong style="color:#22d3ee">60mm (Af基準)</strong><br/>${precipTip60.replace(/\n/g, "<br/>")}`);
+        })
+        .on("mousemove", (event) => {
+          tooltip
+            .style("left", `${event.offsetX + 12}px`)
+            .style("top", `${event.offsetY - 10}px`);
+        })
+        .on("mouseleave", () => { tooltip.style("opacity", 0); });
     }
 
     // 乾燥限界線（ケッペンB群境界、通年型近似を月あたりに変換）
     // BS/C境界: Pann = 20*Tann + 140 → 月あたり: P_m = (20*T + 140) / 12
     // BW/BS境界: Pann = (20*Tann + 140) / 2 → 月あたり: P_m = (20*T + 140) / 24
     const aridLines = [
-      { slope: 20 / 12, intercept: 140 / 12, label: "乾燥限界 (BS)", color: "#fbbf24", dash: "6,3" },
-      { slope: 20 / 24, intercept: 140 / 24, label: "砂漠限界 (BW)", color: "#f97316", dash: "3,3" },
+      {
+        slope: 20 / 12, intercept: 140 / 12, label: "乾燥限界 (BS)", color: "#fbbf24", dash: "6,3",
+        tip: "ケッペンB群（乾燥帯）の境界\n年降水量 < 20×年平均気温+140 で\nステップ気候(BS)に分類\n※通年型近似を月あたりに変換して表示",
+      },
+      {
+        slope: 20 / 24, intercept: 140 / 24, label: "砂漠限界 (BW)", color: "#f97316", dash: "3,3",
+        tip: "ステップ(BS)と砂漠(BW)の境界\n乾燥限界の半分未満で砂漠気候に分類",
+      },
     ];
+
     for (const al of aridLines) {
       const x0 = xMin, x1 = xMax;
       const py0 = al.slope * x0 + al.intercept;
@@ -165,19 +205,26 @@ export default function Hythergraph({ cities }: HythergraphProps) {
           .attr("stroke-width", 1.5)
           .attr("stroke-dasharray", al.dash)
           .attr("opacity", 0.5);
-        // ラベル（右端）
-        const labelX = Math.min(x(x1), innerW) - 2;
-        const labelY = Math.max(y(py1), 0) - 4;
-        if (labelY > 10) {
-          g.append("text")
-            .attr("x", labelX)
-            .attr("y", labelY)
-            .attr("text-anchor", "end")
-            .attr("fill", al.color)
-            .attr("font-size", 9)
-            .attr("opacity", 0.8)
-            .text(al.label);
-        }
+        // ホバー用透明太線
+        g.append("line")
+          .attr("x1", lineData[0][0]).attr("y1", lineData[0][1])
+          .attr("x2", lineData[1][0]).attr("y2", lineData[1][1])
+          .attr("stroke", "transparent")
+          .attr("stroke-width", 12)
+          .style("cursor", "pointer")
+          .on("mouseenter", (event) => {
+            tooltip
+              .style("opacity", 1)
+              .style("left", `${event.offsetX + 12}px`)
+              .style("top", `${event.offsetY - 10}px`)
+              .html(`<strong style="color:${al.color}">${al.label}</strong><br/>${al.tip.replace(/\n/g, "<br/>")}`);
+          })
+          .on("mousemove", (event) => {
+            tooltip
+              .style("left", `${event.offsetX + 12}px`)
+              .style("top", `${event.offsetY - 10}px`);
+          })
+          .on("mouseleave", () => { tooltip.style("opacity", 0); });
       }
     }
 
