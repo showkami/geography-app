@@ -11,16 +11,16 @@ interface HythergraphProps {
 
 const MARGIN = { top: 20, right: 30, bottom: 50, left: 60 };
 const THRESHOLD_TEMPS = [
-  { value: -3, label: "-3°C (C/D境界)", color: "#1565c0" },
-  { value: 10, label: "10°C (D/E境界)", color: "#2e7d32" },
-  { value: 18, label: "18°C (A/C境界)", color: "#e65100" },
-  { value: 22, label: "22°C (a/b境界)", color: "#b71c1c" },
+  { value: -3, label: "-3°C (C/D境界)", color: "#42a5f5" },
+  { value: 10, label: "10°C (D/E境界)", color: "#66bb6a" },
+  { value: 18, label: "18°C (A/C境界)", color: "#ffa726" },
+  { value: 22, label: "22°C (a/b境界)", color: "#ef5350" },
 ];
 
 const ZONE_BANDS = [
-  { min: -Infinity, max: -3, label: "冷帯 D", color: "rgba(33,150,243,0.06)" },
-  { min: -3, max: 18, label: "温帯 C", color: "rgba(76,175,80,0.06)" },
-  { min: 18, max: Infinity, label: "熱帯 A", color: "rgba(255,152,0,0.06)" },
+  { min: -Infinity, max: -3, label: "冷帯 D", color: "rgba(33,150,243,0.08)" },
+  { min: -3, max: 18, label: "温帯 C", color: "rgba(76,175,80,0.08)" },
+  { min: 18, max: Infinity, label: "熱帯 A", color: "rgba(255,152,0,0.08)" },
 ];
 
 export default function Hythergraph({ cities }: HythergraphProps) {
@@ -62,7 +62,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
         .attr("x", width / 2)
         .attr("y", height / 2)
         .attr("text-anchor", "middle")
-        .attr("fill", "#999")
+        .attr("fill", "#94a3b8")
         .attr("font-size", 14)
         .text("都市を追加するとハイサーグラフが表示されます");
       return;
@@ -101,7 +101,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
           .attr("x", (zoneLeft + zoneRight) / 2)
           .attr("y", 12)
           .attr("text-anchor", "middle")
-          .attr("fill", "#999")
+          .attr("fill", "rgba(148,163,184,0.5)")
           .attr("font-size", 10)
           .text(zone.label);
       }
@@ -117,7 +117,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
           .attr("stroke", th.color)
           .attr("stroke-width", 1)
           .attr("stroke-dasharray", "4,3")
-          .attr("opacity", 0.5);
+          .attr("opacity", 0.4);
       }
     }
 
@@ -127,7 +127,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       g.append("line")
         .attr("x1", 0).attr("y1", y60)
         .attr("x2", innerW).attr("y2", y60)
-        .attr("stroke", "#0288d1")
+        .attr("stroke", "#22d3ee")
         .attr("stroke-width", 1)
         .attr("stroke-dasharray", "4,3")
         .attr("opacity", 0.4);
@@ -135,7 +135,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
         .attr("x", innerW - 2)
         .attr("y", y60 - 3)
         .attr("text-anchor", "end")
-        .attr("fill", "#0288d1")
+        .attr("fill", "#22d3ee")
         .attr("font-size", 9)
         .attr("opacity", 0.6)
         .text("60mm");
@@ -145,8 +145,8 @@ export default function Hythergraph({ cities }: HythergraphProps) {
     // BS/C境界: Pann = 20*Tann + 140 → 月あたり: P_m = (20*T + 140) / 12
     // BW/BS境界: Pann = (20*Tann + 140) / 2 → 月あたり: P_m = (20*T + 140) / 24
     const aridLines = [
-      { slope: 20 / 12, intercept: 140 / 12, label: "乾燥限界 (BS)", color: "#f57f17", dash: "6,3" },
-      { slope: 20 / 24, intercept: 140 / 24, label: "砂漠限界 (BW)", color: "#e65100", dash: "3,3" },
+      { slope: 20 / 12, intercept: 140 / 12, label: "乾燥限界 (BS)", color: "#fbbf24", dash: "6,3" },
+      { slope: 20 / 24, intercept: 140 / 24, label: "砂漠限界 (BW)", color: "#f97316", dash: "3,3" },
     ];
     for (const al of aridLines) {
       const x0 = xMin, x1 = xMax;
@@ -175,7 +175,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
             .attr("text-anchor", "end")
             .attr("fill", al.color)
             .attr("font-size", 9)
-            .attr("opacity", 0.7)
+            .attr("opacity", 0.8)
             .text(al.label);
         }
       }
@@ -185,13 +185,15 @@ export default function Hythergraph({ cities }: HythergraphProps) {
     g.append("g")
       .attr("transform", `translate(0,${innerH})`)
       .call(d3.axisBottom(x).ticks(8))
-      .call((sel) => sel.select(".domain").attr("stroke", "#ccc"))
-      .call((sel) => sel.selectAll(".tick line").attr("stroke", "#eee"));
+      .call((sel) => sel.select(".domain").attr("stroke", "rgba(148,163,184,0.3)"))
+      .call((sel) => sel.selectAll(".tick line").attr("stroke", "rgba(148,163,184,0.2)"))
+      .call((sel) => sel.selectAll(".tick text").attr("fill", "#94a3b8"));
 
     g.append("g")
       .call(d3.axisLeft(y).ticks(6))
-      .call((sel) => sel.select(".domain").attr("stroke", "#ccc"))
-      .call((sel) => sel.selectAll(".tick line").attr("stroke", "#eee"));
+      .call((sel) => sel.select(".domain").attr("stroke", "rgba(148,163,184,0.3)"))
+      .call((sel) => sel.selectAll(".tick line").attr("stroke", "rgba(148,163,184,0.2)"))
+      .call((sel) => sel.selectAll(".tick text").attr("fill", "#94a3b8"));
 
     // 軸ラベル
     svg
@@ -199,7 +201,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       .attr("x", MARGIN.left + innerW / 2)
       .attr("y", height - 8)
       .attr("text-anchor", "middle")
-      .attr("fill", "#666")
+      .attr("fill", "#94a3b8")
       .attr("font-size", 12)
       .text("月平均気温 (°C)");
 
@@ -209,7 +211,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       .attr("x", -(MARGIN.top + innerH / 2))
       .attr("y", 16)
       .attr("text-anchor", "middle")
-      .attr("fill", "#666")
+      .attr("fill", "#94a3b8")
       .attr("font-size", 12)
       .text("月降水量 (mm)");
 
@@ -232,10 +234,10 @@ export default function Hythergraph({ cities }: HythergraphProps) {
         .datum(points)
         .attr("d", lineGen)
         .attr("fill", cd.city.color)
-        .attr("fill-opacity", 0.08)
+        .attr("fill-opacity", 0.12)
         .attr("stroke", cd.city.color)
         .attr("stroke-width", 2)
-        .attr("stroke-opacity", 0.7)
+        .attr("stroke-opacity", 0.8)
         .attr("class", `polygon-${ci}`);
 
       // 月ポイント
@@ -245,7 +247,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
           .attr("cy", y(pt.p))
           .attr("r", 4)
           .attr("fill", cd.city.color)
-          .attr("stroke", "#fff")
+          .attr("stroke", "rgba(12,18,34,0.6)")
           .attr("stroke-width", 1.5)
           .attr("class", `point-${ci}-${m}`)
           .style("cursor", "pointer")
@@ -254,7 +256,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
             g.select(`.polygon-${ci}`)
               .attr("stroke-width", 3)
               .attr("stroke-opacity", 1)
-              .attr("fill-opacity", 0.15);
+              .attr("fill-opacity", 0.2);
 
             tooltip
               .style("opacity", 1)
@@ -270,8 +272,8 @@ export default function Hythergraph({ cities }: HythergraphProps) {
             d3.select(event.currentTarget).attr("r", 4);
             g.select(`.polygon-${ci}`)
               .attr("stroke-width", 2)
-              .attr("stroke-opacity", 0.7)
-              .attr("fill-opacity", 0.08);
+              .attr("stroke-opacity", 0.8)
+              .attr("fill-opacity", 0.12);
             tooltip.style("opacity", 0);
           });
 
@@ -289,7 +291,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
           .attr("fill", cd.city.color)
           .attr("font-size", 9)
           .attr("font-weight", 600)
-          .attr("opacity", 0.8)
+          .attr("opacity", 0.9)
           .text(m + 1);
       });
 
@@ -304,7 +306,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
         .attr("d", diamond()!)
         .attr("transform", `translate(${x(Tann)},${y(PannPerMonth)})`)
         .attr("fill", cd.city.color)
-        .attr("stroke", "#fff")
+        .attr("stroke", "rgba(12,18,34,0.6)")
         .attr("stroke-width", 2)
         .style("cursor", "pointer")
         .on("mouseenter", (event) => {
@@ -313,7 +315,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
           g.select(`.polygon-${ci}`)
             .attr("stroke-width", 3)
             .attr("stroke-opacity", 1)
-            .attr("fill-opacity", 0.15);
+            .attr("fill-opacity", 0.2);
           tooltip
             .style("opacity", 1)
             .style("left", `${event.offsetX + 12}px`)
@@ -329,8 +331,8 @@ export default function Hythergraph({ cities }: HythergraphProps) {
             .attr("d", d3.symbol().type(d3.symbolDiamond).size(120)()!);
           g.select(`.polygon-${ci}`)
             .attr("stroke-width", 2)
-            .attr("stroke-opacity", 0.7)
-            .attr("fill-opacity", 0.08);
+            .attr("stroke-opacity", 0.8)
+            .attr("fill-opacity", 0.12);
           tooltip.style("opacity", 0);
         });
     });
@@ -358,7 +360,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
         .attr("x", 22).attr("y", ly)
         .attr("dominant-baseline", "middle")
         .attr("font-size", 11)
-        .attr("fill", "#333")
+        .attr("fill", "#e2e8f0")
         .text(`${cd.city.name}${cd.koppen ? ` (${cd.koppen.code})` : ""}`);
     });
 
@@ -368,18 +370,18 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       .append("path")
       .attr("d", d3.symbol().type(d3.symbolDiamond).size(60)()!)
       .attr("transform", `translate(8,${diamondLegendY})`)
-      .attr("fill", "#666");
+      .attr("fill", "#94a3b8");
     legend
       .append("text")
       .attr("x", 22).attr("y", diamondLegendY)
       .attr("dominant-baseline", "middle")
       .attr("font-size", 10)
-      .attr("fill", "#999")
+      .attr("fill", "#94a3b8")
       .text("= 年平均値");
   }, [cities, allPoints]);
 
   return (
-    <Box sx={{ position: "relative", bgcolor: "#f8fafc", borderRadius: 2, p: 1 }}>
+    <Box sx={{ position: "relative", bgcolor: "rgba(12,18,34,0.5)", borderRadius: 2, p: 1 }}>
       <svg
         ref={svgRef}
         style={{ width: "100%", height: "auto", maxHeight: 500 }}
@@ -390,14 +392,15 @@ export default function Hythergraph({ cities }: HythergraphProps) {
           position: "absolute",
           pointerEvents: "none",
           opacity: 0,
-          bgcolor: "rgba(255,255,255,0.95)",
-          border: "1px solid #ddd",
+          bgcolor: "rgba(15,23,42,0.95)",
+          color: "#e2e8f0",
+          border: "1px solid rgba(148,163,184,0.15)",
           borderRadius: 1,
           px: 1.5,
           py: 0.5,
           fontSize: "0.75rem",
           lineHeight: 1.4,
-          boxShadow: 1,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
           transition: "opacity 0.15s",
           zIndex: 10,
         }}
