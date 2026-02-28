@@ -26,7 +26,7 @@ interface KoppenFlowchartProps {
   traces: Map<string, KoppenTracePath>;
 }
 
-const VIEW_W = 1200;
+const VIEW_W = 1380;
 const VIEW_H = 700;
 const BASE_COLOR = "rgba(148,163,184,0.15)";
 const BASE_TEXT = "rgba(148,163,184,0.5)";

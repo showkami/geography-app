@@ -52,7 +52,7 @@ export const NODES: FlowchartNode[] = [
   { id: "bw_temp", type: "decision", label: "Tann ≥ 18°C?", sublabel: "年平均気温 (砂漠)", group: "B", x: 345, y: 336, width: 148, height: 34 },
   { id: "bs_temp", type: "decision", label: "Tann ≥ 18°C?", sublabel: "年平均気温 (ステップ)", group: "B", x: 565, y: 336, width: 148, height: 34 },
   { id: "a_pmin60", type: "decision", label: "Pmin ≥ 60mm?", sublabel: "最少月降水量", group: "A", x: 760, y: 336, width: 150, height: 34 },
-  { id: "cd_check", type: "decision", label: "Tmin > −3°C?", sublabel: "最寒月平均気温", x: 1010, y: 336, width: 150, height: 34 },
+  { id: "cd_check", type: "decision", label: "Tmin > −3°C?", sublabel: "最寒月平均気温", x: 1070, y: 336, width: 150, height: 34 },
 
   // Level 5: B結果 / Af / Am判定 / C群・D群
   { id: "BWh", type: "result", label: "BWh", sublabel: "高温砂漠", group: "B", x: 283, y: 418, width: 60, height: 38 },
@@ -61,37 +61,37 @@ export const NODES: FlowchartNode[] = [
   { id: "BSk", type: "result", label: "BSk", sublabel: "低温ステップ", group: "B", x: 622, y: 418, width: 60, height: 38 },
   { id: "Af", type: "result", label: "Af", sublabel: "熱帯雨林", group: "A", x: 700, y: 418, width: 60, height: 38 },
   { id: "a_am", type: "decision", label: "Pmin ≥ Am閾値?", sublabel: "100−Pann/25", group: "A", x: 820, y: 418, width: 162, height: 34 },
-  { id: "c_group", type: "decision", label: "C群", sublabel: "降水型 + 温度型", group: "C", x: 935, y: 418, width: 90, height: 34 },
-  { id: "d_group", type: "decision", label: "D群", sublabel: "降水型 + 温度型", group: "D", x: 1095, y: 418, width: 90, height: 34 },
+  { id: "c_group", type: "decision", label: "C群", sublabel: "降水型 + 温度型", group: "C", x: 995, y: 418, width: 90, height: 34 },
+  { id: "d_group", type: "decision", label: "D群", sublabel: "降水型 + 温度型", group: "D", x: 1175, y: 418, width: 90, height: 34 },
 
   // Level 6: Am/Aw結果
   { id: "Am", type: "result", label: "Am", sublabel: "熱帯モンスーン", group: "A", x: 770, y: 496, width: 60, height: 38 },
   { id: "Aw", type: "result", label: "Aw", sublabel: "サバナ", group: "A", x: 870, y: 496, width: 60, height: 38 },
 
-  // C群マトリクス (3×3) — cols: a=893, b=940, c=987 / rows: s=530, w=576, f=622
-  { id: "Csa", type: "result", label: "Csa", group: "C", x: 893, y: 530, width: 44, height: 32 },
-  { id: "Csb", type: "result", label: "Csb", group: "C", x: 940, y: 530, width: 44, height: 32 },
-  { id: "Csc", type: "result", label: "Csc", group: "C", x: 987, y: 530, width: 44, height: 32 },
-  { id: "Cwa", type: "result", label: "Cwa", group: "C", x: 893, y: 576, width: 44, height: 32 },
-  { id: "Cwb", type: "result", label: "Cwb", group: "C", x: 940, y: 576, width: 44, height: 32 },
-  { id: "Cwc", type: "result", label: "Cwc", group: "C", x: 987, y: 576, width: 44, height: 32 },
-  { id: "Cfa", type: "result", label: "Cfa", group: "C", x: 893, y: 622, width: 44, height: 32 },
-  { id: "Cfb", type: "result", label: "Cfb", group: "C", x: 940, y: 622, width: 44, height: 32 },
-  { id: "Cfc", type: "result", label: "Cfc", group: "C", x: 987, y: 622, width: 44, height: 32 },
+  // C群マトリクス (3×3) — cols: a=953, b=1000, c=1047 / rows: s=530, w=576, f=622
+  { id: "Csa", type: "result", label: "Csa", group: "C", x: 953, y: 530, width: 44, height: 32 },
+  { id: "Csb", type: "result", label: "Csb", group: "C", x: 1000, y: 530, width: 44, height: 32 },
+  { id: "Csc", type: "result", label: "Csc", group: "C", x: 1047, y: 530, width: 44, height: 32 },
+  { id: "Cwa", type: "result", label: "Cwa", group: "C", x: 953, y: 576, width: 44, height: 32 },
+  { id: "Cwb", type: "result", label: "Cwb", group: "C", x: 1000, y: 576, width: 44, height: 32 },
+  { id: "Cwc", type: "result", label: "Cwc", group: "C", x: 1047, y: 576, width: 44, height: 32 },
+  { id: "Cfa", type: "result", label: "Cfa", group: "C", x: 953, y: 622, width: 44, height: 32 },
+  { id: "Cfb", type: "result", label: "Cfb", group: "C", x: 1000, y: 622, width: 44, height: 32 },
+  { id: "Cfc", type: "result", label: "Cfc", group: "C", x: 1047, y: 622, width: 44, height: 32 },
 
-  // D群マトリクス (3×4) — cols: a=1040, b=1080, c=1120, d=1160 / rows: s=530, w=576, f=622
-  { id: "Dsa", type: "result", label: "Dsa", group: "D", x: 1040, y: 530, width: 38, height: 32 },
-  { id: "Dsb", type: "result", label: "Dsb", group: "D", x: 1080, y: 530, width: 38, height: 32 },
-  { id: "Dsc", type: "result", label: "Dsc", group: "D", x: 1120, y: 530, width: 38, height: 32 },
-  { id: "Dsd", type: "result", label: "Dsd", group: "D", x: 1160, y: 530, width: 38, height: 32 },
-  { id: "Dwa", type: "result", label: "Dwa", group: "D", x: 1040, y: 576, width: 38, height: 32 },
-  { id: "Dwb", type: "result", label: "Dwb", group: "D", x: 1080, y: 576, width: 38, height: 32 },
-  { id: "Dwc", type: "result", label: "Dwc", group: "D", x: 1120, y: 576, width: 38, height: 32 },
-  { id: "Dwd", type: "result", label: "Dwd", group: "D", x: 1160, y: 576, width: 38, height: 32 },
-  { id: "Dfa", type: "result", label: "Dfa", group: "D", x: 1040, y: 622, width: 38, height: 32 },
-  { id: "Dfb", type: "result", label: "Dfb", group: "D", x: 1080, y: 622, width: 38, height: 32 },
-  { id: "Dfc", type: "result", label: "Dfc", group: "D", x: 1120, y: 622, width: 38, height: 32 },
-  { id: "Dfd", type: "result", label: "Dfd", group: "D", x: 1160, y: 622, width: 38, height: 32 },
+  // D群マトリクス (3×4) — cols: a=1120, b=1160, c=1200, d=1240 / rows: s=530, w=576, f=622
+  { id: "Dsa", type: "result", label: "Dsa", group: "D", x: 1120, y: 530, width: 38, height: 32 },
+  { id: "Dsb", type: "result", label: "Dsb", group: "D", x: 1160, y: 530, width: 38, height: 32 },
+  { id: "Dsc", type: "result", label: "Dsc", group: "D", x: 1200, y: 530, width: 38, height: 32 },
+  { id: "Dsd", type: "result", label: "Dsd", group: "D", x: 1240, y: 530, width: 38, height: 32 },
+  { id: "Dwa", type: "result", label: "Dwa", group: "D", x: 1120, y: 576, width: 38, height: 32 },
+  { id: "Dwb", type: "result", label: "Dwb", group: "D", x: 1160, y: 576, width: 38, height: 32 },
+  { id: "Dwc", type: "result", label: "Dwc", group: "D", x: 1200, y: 576, width: 38, height: 32 },
+  { id: "Dwd", type: "result", label: "Dwd", group: "D", x: 1240, y: 576, width: 38, height: 32 },
+  { id: "Dfa", type: "result", label: "Dfa", group: "D", x: 1120, y: 622, width: 38, height: 32 },
+  { id: "Dfb", type: "result", label: "Dfb", group: "D", x: 1160, y: 622, width: 38, height: 32 },
+  { id: "Dfc", type: "result", label: "Dfc", group: "D", x: 1200, y: 622, width: 38, height: 32 },
+  { id: "Dfd", type: "result", label: "Dfd", group: "D", x: 1240, y: 622, width: 38, height: 32 },
 ];
 
 // ─── エッジ定義 ───────────────────────────────────────
@@ -150,10 +150,10 @@ export const EDGES: FlowchartEdge[] = [
 
 export const GROUP_REGIONS: GroupRegion[] = [
   { group: "E", label: "E 寒帯", x: 20, y: 132, width: 248, height: 178 },
-  { group: "B", label: "B 乾燥帯", x: 250, y: 218, width: 440, height: 256 },
-  { group: "A", label: "A 熱帯", x: 670, y: 218, width: 240, height: 332 },
-  { group: "C", label: "C 温帯", x: 862, y: 386, width: 154, height: 284 },
-  { group: "D", label: "D 冷帯", x: 1018, y: 386, width: 175, height: 284 },
+  { group: "B", label: "B 乾燥帯", x: 250, y: 218, width: 420, height: 256 },
+  { group: "A", label: "A 熱帯", x: 678, y: 218, width: 235, height: 332 },
+  { group: "C", label: "C 温帯", x: 920, y: 386, width: 158, height: 284 },
+  { group: "D", label: "D 冷帯", x: 1082, y: 386, width: 192, height: 284 },
 ];
 
 // ─── C/Dマトリクスのヘッダー ──────────────────────────
@@ -168,11 +168,11 @@ export interface MatrixHeader {
 
 export const C_MATRIX = {
   colHeaders: [
-    { label: "a", key: "a", x: 893,
+    { label: "a", key: "a", x: 953,
       tip: "温度型 a（暑夏）\nTmax ≥ 22°C\n最暖月平均気温が22°C以上" },
-    { label: "b", key: "b", x: 940,
+    { label: "b", key: "b", x: 1000,
       tip: "温度型 b（温暖夏）\nTmax < 22°C かつ Nwarm ≥ 4\n月平均10°C以上の月が4ヶ月以上" },
-    { label: "c", key: "c", x: 987,
+    { label: "c", key: "c", x: 1047,
       tip: "温度型 c（冷涼夏）\nNwarm < 4\n月平均10°C以上の月が3ヶ月以下" },
   ] as MatrixHeader[],
   rowHeaders: [
@@ -184,18 +184,18 @@ export const C_MATRIX = {
       tip: "降水型 f（湿潤）\ns にも w にも該当しない\n年間を通じて明瞭な乾季がない" },
   ] as MatrixHeader[],
   headerY: 505,
-  headerX: 855,
+  headerX: 915,
 };
 
 export const D_MATRIX = {
   colHeaders: [
-    { label: "a", key: "a", x: 1040,
+    { label: "a", key: "a", x: 1120,
       tip: "温度型 a（暑夏）\nTmax ≥ 22°C\n最暖月平均気温が22°C以上" },
-    { label: "b", key: "b", x: 1080,
+    { label: "b", key: "b", x: 1160,
       tip: "温度型 b（温暖夏）\nTmax < 22°C かつ Nwarm ≥ 4\n月平均10°C以上の月が4ヶ月以上" },
-    { label: "c", key: "c", x: 1120,
+    { label: "c", key: "c", x: 1200,
       tip: "温度型 c（冷涼夏）\nNwarm < 4\n月平均10°C以上の月が3ヶ月以下" },
-    { label: "d", key: "d", x: 1160,
+    { label: "d", key: "d", x: 1240,
       tip: "温度型 d（極寒冬）\nTmin < −38°C\n最寒月平均気温が−38°C未満\nD群のみ: C群は Tmin > −3°C なので該当しない" },
   ] as MatrixHeader[],
   rowHeaders: [
@@ -207,7 +207,7 @@ export const D_MATRIX = {
       tip: "降水型 f（湿潤）\ns にも w にも該当しない\n年間を通じて明瞭な乾季がない" },
   ] as MatrixHeader[],
   headerY: 505,
-  headerX: 1018,
+  headerX: 1098,
 };
 
 // ─── ノードメトリクス（ツールチップ用） ───────────────
