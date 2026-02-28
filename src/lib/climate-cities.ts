@@ -23,13 +23,16 @@ export interface PresetCity {
 /** 主要な気候帯を網羅するプリセット都市 */
 export const PRESET_CITIES: PresetCity[] = [
   { name: "東京", country: "日本", latitude: 35.68, longitude: 139.69 },
+  { name: "新潟", country: "日本", latitude: 37.92, longitude: 139.04 },
+  { name: "高松", country: "日本", latitude: 34.34, longitude: 134.04 },
+  { name: "ロンドン", country: "イギリス", latitude: 51.51, longitude: -0.13 },
+  { name: "ニューヨーク", country: "アメリカ", latitude: 40.71, longitude: -74.01 },
   { name: "シンガポール", country: "シンガポール", latitude: 1.29, longitude: 103.85 },
   { name: "カイロ", country: "エジプト", latitude: 30.04, longitude: 31.24 },
-  { name: "ロンドン", country: "イギリス", latitude: 51.51, longitude: -0.13 },
-  { name: "モスクワ", country: "ロシア", latitude: 55.76, longitude: 37.62 },
   { name: "ローマ", country: "イタリア", latitude: 41.89, longitude: 12.50 },
-  { name: "バロー", country: "アメリカ", latitude: 71.29, longitude: -156.79 },
+  { name: "モスクワ", country: "ロシア", latitude: 55.76, longitude: 37.62 },
   { name: "ナイロビ", country: "ケニア", latitude: -1.29, longitude: 36.82 },
+  { name: "バロー", country: "アメリカ", latitude: 71.29, longitude: -156.79 },
 ];
 
 export function makeCityId(lat: number, lon: number): string {
