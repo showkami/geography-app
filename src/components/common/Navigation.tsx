@@ -10,6 +10,7 @@ import {
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import MapIcon from "@mui/icons-material/Map";
 import AirIcon from "@mui/icons-material/Air";
+import ThermostatIcon from "@mui/icons-material/Thermostat";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -17,6 +18,7 @@ const tabItems = [
   { label: "地軸の傾き", href: "/day-night", icon: <WbSunnyIcon /> },
   { label: "地図投影法", href: "/projections", icon: <MapIcon /> },
   { label: "大気大循環", href: "/atmospheric-circulation", icon: <AirIcon /> },
+  { label: "気候", href: "/climate", icon: <ThermostatIcon /> },
 ];
 
 export default function Navigation() {
