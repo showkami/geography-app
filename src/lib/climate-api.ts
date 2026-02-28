@@ -2,8 +2,8 @@ import { GeocodingResult, MonthlyNormals } from "./climate-types";
 
 const normalsCache = new Map<string, MonthlyNormals>();
 
-function cacheKey(lat: number, lon: number): string {
-  return `${lat.toFixed(2)}_${lon.toFixed(2)}`;
+function cacheKey(lat: number, lon: number, startYear: number, endYear: number): string {
+  return `${lat.toFixed(2)}_${lon.toFixed(2)}_${startYear}_${endYear}`;
 }
 
 /** Open-Meteo Geocoding APIで都市を検索 */
@@ -16,28 +16,46 @@ export async function searchCities(query: string): Promise<GeocodingResult[]> {
   return data.results ?? [];
 }
 
-/** Open-Meteo Historical APIで30年分の日別データを取得し月別平年値に集約 */
+/** 429レート制限時に自動リトライするfetch */
+async function fetchWithRetry(url: string, maxRetries = 3): Promise<unknown> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const response = await fetch(url);
+    if (response.status === 429) {
+      if (attempt === maxRetries) throw new Error("APIレート制限に達しました。しばらく待ってから再試行してください。");
+      const retryAfter = response.headers.get("Retry-After");
+      const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 2000 * (attempt + 1);
+      await new Promise((r) => setTimeout(r, waitMs));
+      continue;
+    }
+    if (!response.ok) throw new Error(`Climate API error: ${response.status}`);
+    return response.json();
+  }
+  throw new Error("リトライ回数超過");
+}
+
+/** Open-Meteo Historical APIで指定年範囲の日別データを取得し月別平年値に集約 */
 export async function fetchMonthlyNormals(
   latitude: number,
-  longitude: number
+  longitude: number,
+  startYear: number = 1991,
+  endYear: number = 2020
 ): Promise<MonthlyNormals> {
-  const key = cacheKey(latitude, longitude);
+  const key = cacheKey(latitude, longitude, startYear, endYear);
   const cached = normalsCache.get(key);
   if (cached) return cached;
 
   const url = new URL("https://archive-api.open-meteo.com/v1/archive");
   url.searchParams.set("latitude", latitude.toFixed(4));
   url.searchParams.set("longitude", longitude.toFixed(4));
-  url.searchParams.set("start_date", "1991-01-01");
-  url.searchParams.set("end_date", "2020-12-31");
+  url.searchParams.set("start_date", `${startYear}-01-01`);
+  url.searchParams.set("end_date", `${endYear}-12-31`);
   url.searchParams.set("daily", "temperature_2m_mean,precipitation_sum");
   url.searchParams.set("timezone", "auto");
 
-  const response = await fetch(url.toString());
-  if (!response.ok) throw new Error(`Climate API error: ${response.status}`);
-  const data = await response.json();
+  const data = await fetchWithRetry(url.toString()) as { daily: { time: string[]; temperature_2m_mean: (number | null)[]; precipitation_sum: (number | null)[] } };
 
-  const normals = aggregateToMonthlyNormals(data.daily);
+  const years = endYear - startYear + 1;
+  const normals = aggregateToMonthlyNormals(data.daily, years);
   normalsCache.set(key, normals);
   return normals;
 }
@@ -46,7 +64,7 @@ function aggregateToMonthlyNormals(daily: {
   time: string[];
   temperature_2m_mean: (number | null)[];
   precipitation_sum: (number | null)[];
-}): MonthlyNormals {
+}, years: number): MonthlyNormals {
   const tempSums = new Float64Array(12);
   const tempCounts = new Uint32Array(12);
   const precipSums = new Float64Array(12);
@@ -67,7 +85,6 @@ function aggregateToMonthlyNormals(daily: {
     }
   }
 
-  const years = 30;
   const temperature: number[] = [];
   const precipitation: number[] = [];
 
