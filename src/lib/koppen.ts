@@ -234,3 +234,136 @@ export const KOPPEN_GROUP_COLORS: Record<string, string> = {
   D: "#00b0ff",
   E: "#b0bec5",
 };
+
+// ─── フローチャート判定パス追跡 ─────────────────────
+
+export interface KoppenTracePath {
+  visitedNodes: string[];
+  finalNode: string;
+}
+
+/**
+ * ケッペン分類の判定パスを追跡する（フローチャートのハイライト用）
+ * classifyKoppen と同じ判定ロジックを使い、通過したノードIDの配列を返す
+ */
+export function traceKoppenPath(
+  temperature: number[],
+  precipitation: number[],
+  latitude: number
+): KoppenTracePath {
+  const visited: string[] = ["start"];
+  const Tann = temperature.reduce((a, b) => a + b, 0) / 12;
+  const Tmax = Math.max(...temperature);
+  const Tmin = Math.min(...temperature);
+  const Pann = precipitation.reduce((a, b) => a + b, 0);
+  const Pmin = Math.min(...precipitation);
+
+  const summerMonths = latitude >= 0
+    ? [3, 4, 5, 6, 7, 8]
+    : [0, 1, 2, 9, 10, 11];
+  const winterMonths = latitude >= 0
+    ? [0, 1, 2, 9, 10, 11]
+    : [3, 4, 5, 6, 7, 8];
+
+  const Ps = summerMonths.map((m) => precipitation[m]);
+  const Pw = winterMonths.map((m) => precipitation[m]);
+  const Psmin = Math.min(...Ps);
+  const Psmax = Math.max(...Ps);
+  const Pwmin = Math.min(...Pw);
+  const Pwmax = Math.max(...Pw);
+  const PsTotal = Ps.reduce((a, b) => a + b, 0);
+  const Nwarm = temperature.filter((t) => t >= 10).length;
+
+  // E群判定
+  visited.push("e_check");
+  if (Tmax < 10) {
+    visited.push("e_sub");
+    if (Tmax < 0) {
+      visited.push("EF");
+      return { visitedNodes: visited, finalNode: "EF" };
+    } else {
+      visited.push("ET");
+      return { visitedNodes: visited, finalNode: "ET" };
+    }
+  }
+
+  // B群判定
+  const summerPrecipFraction = PsTotal / (Pann || 1);
+  let Pthreshold: number;
+  if (summerPrecipFraction >= 0.7) {
+    Pthreshold = 20 * Tann + 280;
+  } else if (summerPrecipFraction <= 0.3) {
+    Pthreshold = 20 * Tann;
+  } else {
+    Pthreshold = 20 * Tann + 140;
+  }
+
+  visited.push("b_check");
+  if (Pann < Pthreshold) {
+    visited.push("b_desert");
+    const isDesert = Pann < Pthreshold / 2;
+    if (isDesert) {
+      visited.push("bw_temp");
+      const code = Tann >= 18 ? "BWh" : "BWk";
+      visited.push(code);
+      return { visitedNodes: visited, finalNode: code };
+    } else {
+      visited.push("bs_temp");
+      const code = Tann >= 18 ? "BSh" : "BSk";
+      visited.push(code);
+      return { visitedNodes: visited, finalNode: code };
+    }
+  }
+
+  // A群判定
+  visited.push("a_check");
+  if (Tmin >= 18) {
+    visited.push("a_pmin60");
+    if (Pmin >= 60) {
+      visited.push("Af");
+      return { visitedNodes: visited, finalNode: "Af" };
+    }
+    visited.push("a_am");
+    const amThreshold = 100 - Pann / 25;
+    if (Pmin >= amThreshold) {
+      visited.push("Am");
+      return { visitedNodes: visited, finalNode: "Am" };
+    }
+    visited.push("Aw");
+    return { visitedNodes: visited, finalNode: "Aw" };
+  }
+
+  // C/D判定
+  visited.push("cd_check");
+  const isD = Tmin <= -3;
+  const groupLetter = isD ? "D" : "C";
+  visited.push(isD ? "d_group" : "c_group");
+
+  // 降水型
+  const isDrySummer = Psmin < 40 && Psmin < Pwmax / 3;
+  const isDryWinter = Pwmin < Psmax / 10;
+  let secondLetter: string;
+  if (isDrySummer) {
+    secondLetter = "s";
+  } else if (isDryWinter) {
+    secondLetter = "w";
+  } else {
+    secondLetter = "f";
+  }
+
+  // 温度型
+  let thirdLetter: string;
+  if (Tmax >= 22) {
+    thirdLetter = "a";
+  } else if (Nwarm >= 4) {
+    thirdLetter = "b";
+  } else if (isD && Tmin < -38) {
+    thirdLetter = "d";
+  } else {
+    thirdLetter = "c";
+  }
+
+  const code = groupLetter + secondLetter + thirdLetter;
+  visited.push(code);
+  return { visitedNodes: visited, finalNode: code };
+}

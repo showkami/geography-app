@@ -5,13 +5,13 @@ import { Container, Grid, Paper, Typography, Box } from "@mui/material";
 import CitySearch from "@/components/climate/CitySearch";
 import CityList from "@/components/climate/CityList";
 import Hythergraph from "@/components/climate/Hythergraph";
-import KoppenBadge from "@/components/climate/KoppenBadge";
+import KoppenFlowchart from "@/components/climate/KoppenFlowchart";
 import ClimateDataTable from "@/components/climate/ClimateDataTable";
 import YearRangeSlider from "@/components/climate/YearRangeSlider";
 import { CityClimateData } from "@/lib/climate-types";
 import { makeCityId, assignColor, MAX_CITIES } from "@/lib/climate-cities";
 import { fetchMonthlyNormals } from "@/lib/climate-api";
-import { classifyKoppen } from "@/lib/koppen";
+import { classifyKoppen, traceKoppenPath, KoppenTracePath } from "@/lib/koppen";
 
 export default function ClimatePage() {
   const [cities, setCities] = useState<CityClimateData[]>([]);
@@ -124,6 +124,16 @@ export default function ClimatePage() {
     [cities]
   );
 
+  const koppenTraces = useMemo(() => {
+    const map = new Map<string, KoppenTracePath>();
+    for (const cd of loadedCities) {
+      if (!cd.normals) continue;
+      const trace = traceKoppenPath(cd.normals.temperature, cd.normals.precipitation, cd.city.latitude);
+      map.set(cd.city.id, trace);
+    }
+    return map;
+  }, [loadedCities]);
+
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Grid container spacing={3}>
@@ -166,13 +176,13 @@ export default function ClimatePage() {
           </Paper>
         </Grid>
 
-        {/* ケッペン分類バッジ */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Paper sx={{ p: 2 }}>
+        {/* ケッペンフローチャート */}
+        <Grid size={{ xs: 12 }}>
+          <Paper sx={{ p: 2, overflowX: "auto" }}>
             <Typography variant="subtitle2" fontWeight={700} gutterBottom>
               ケッペン気候区分
             </Typography>
-            <KoppenBadge cities={loadedCities} />
+            <KoppenFlowchart cities={loadedCities} traces={koppenTraces} />
           </Paper>
         </Grid>
 
