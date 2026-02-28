@@ -127,8 +127,8 @@ export default function ProjectionMap({
       g.append("path")
         .datum(outline)
         .attr("d", path)
-        .attr("fill", "#e8f4fd")
-        .attr("stroke", "#90caf9")
+        .attr("fill", "#152238")
+        .attr("stroke", "rgba(56, 189, 248, 0.25)")
         .attr("stroke-width", 1.5);
 
       // グラティキュール（経緯線）
@@ -137,14 +137,14 @@ export default function ProjectionMap({
         .datum(graticule())
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#c5cae9")
+        .attr("stroke", "rgba(148, 163, 184, 0.15)")
         .attr("stroke-width", 0.4);
 
       // 陸地の塗りつぶし
       g.append("path")
         .datum(land)
         .attr("d", path)
-        .attr("fill", "#a5d6a7")
+        .attr("fill", "#2d5a3e")
         .attr("stroke", "none");
 
       // 国境線
@@ -152,7 +152,7 @@ export default function ProjectionMap({
         .datum(borders)
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#66bb6a")
+        .attr("stroke", "#4a8a5e")
         .attr("stroke-width", 0.5);
 
       // 赤道
@@ -178,7 +178,7 @@ export default function ProjectionMap({
         .datum(outline)
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#546e7a")
+        .attr("stroke", "rgba(148, 163, 184, 0.3)")
         .attr("stroke-width", 1.5);
     };
 

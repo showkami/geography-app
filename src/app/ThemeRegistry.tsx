@@ -20,7 +20,11 @@ export default function ThemeRegistry({
         component="main"
         sx={{
           minHeight: "calc(100vh - 49px)",
-          bgcolor: "background.default",
+          background: `
+            radial-gradient(ellipse at 10% 0%, rgba(56, 189, 248, 0.04) 0%, transparent 50%),
+            radial-gradient(ellipse at 90% 100%, rgba(192, 132, 252, 0.03) 0%, transparent 50%),
+            #0c1222
+          `,
         }}
       >
         {children}

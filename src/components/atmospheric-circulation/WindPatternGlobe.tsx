@@ -155,7 +155,7 @@ export default function WindPatternGlobe({
         .attr("cx", width / 2)
         .attr("cy", height / 2)
         .attr("r", projection.scale()!)
-        .attr("fill", "#e8f4fd")
+        .attr("fill", "#152238")
         .attr("stroke", "none");
 
       // Graticule (subtle)
@@ -164,7 +164,7 @@ export default function WindPatternGlobe({
         .datum(d3.geoGraticule().step([30, 30])())
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#c5dff0")
+        .attr("stroke", "rgba(148, 163, 184, 0.12)")
         .attr("stroke-width", 0.3);
 
       // Pressure zone bands
@@ -218,8 +218,8 @@ export default function WindPatternGlobe({
         .append("path")
         .datum(land)
         .attr("d", path)
-        .attr("fill", "#a5d6a7")
-        .attr("stroke", "#4caf50")
+        .attr("fill", "#2d5a3e")
+        .attr("stroke", "#4a8a5e")
         .attr("stroke-width", 0.5)
         .attr("opacity", 0.85);
 
@@ -329,7 +329,7 @@ export default function WindPatternGlobe({
             .attr("font-size", ld.bold ? 12 : 10)
             .attr("font-weight", ld.bold ? 700 : 600)
             .attr("fill", ld.color)
-            .attr("stroke", "white")
+            .attr("stroke", "rgba(12, 18, 34, 0.7)")
             .attr("stroke-width", 2.5)
             .attr("paint-order", "stroke")
             .text(ld.text);
@@ -343,7 +343,7 @@ export default function WindPatternGlobe({
         .attr("cy", height / 2)
         .attr("r", projection.scale()!)
         .attr("fill", "none")
-        .attr("stroke", "#455a64")
+        .attr("stroke", "rgba(148, 163, 184, 0.25)")
         .attr("stroke-width", 1.5);
 
       // Note
@@ -353,7 +353,7 @@ export default function WindPatternGlobe({
         .attr("y", height - 6)
         .attr("text-anchor", "middle")
         .attr("font-size", 9)
-        .attr("fill", "#90a4ae")
+        .attr("fill", "#64748b")
         .text("※ 気圧帯・ITCZは帯状平均（経度差は省略）");
     },
     [width, height]

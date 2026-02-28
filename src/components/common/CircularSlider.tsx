@@ -171,7 +171,7 @@ export default function CircularSlider({
         cy={VB_HALF}
         r={RADIUS}
         fill="none"
-        stroke="#e8e8e8"
+        stroke="rgba(148, 163, 184, 0.15)"
         strokeWidth={TRACK_W}
       />
 
@@ -188,7 +188,7 @@ export default function CircularSlider({
               y1={p1.y}
               x2={p2.x}
               y2={p2.y}
-              stroke="#ccc"
+              stroke="rgba(148, 163, 184, 0.25)"
               strokeWidth={1}
             />
             <text
@@ -197,7 +197,7 @@ export default function CircularSlider({
               textAnchor="middle"
               dominantBaseline="central"
               fontSize={FONT_SIZE}
-              fill="#999"
+              fill="#94a3b8"
               fontFamily="sans-serif"
             >
               {l.label}
@@ -211,12 +211,12 @@ export default function CircularSlider({
         cx={thumb.x}
         cy={thumb.y}
         r={TRACK_W * 0.85}
-        fill="white"
+        fill="#1e293b"
         stroke={color}
         strokeWidth={2.5}
         style={{
           cursor: isDragging ? "grabbing" : "grab",
-          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.18))",
+          filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.4))",
         }}
       />
       <circle

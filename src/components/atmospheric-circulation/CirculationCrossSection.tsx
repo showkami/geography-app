@@ -228,12 +228,12 @@ export default function CirculationCrossSection({
 
       <defs>
         <radialGradient id="earthG" cx="50%" cy="100%" r="75%">
-          <stop offset="0%" stopColor="#d7ccc8" />
-          <stop offset="100%" stopColor="#a1887f" />
+          <stop offset="0%" stopColor="#5d4e47" />
+          <stop offset="100%" stopColor="#3e302a" />
         </radialGradient>
         <radialGradient id="atmosG" cx="50%" cy="100%" r="100%" fx="50%" fy="100%">
-          <stop offset="0%" stopColor="#e3f2fd" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#e8eaf6" stopOpacity="0.08" />
+          <stop offset="0%" stopColor="#1e3a5f" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#1a1f3a" stopOpacity="0.08" />
         </radialGradient>
       </defs>
 
@@ -253,7 +253,7 @@ export default function CirculationCrossSection({
             y1={pY(a, earthR)}
             x2={pX(a, outerR)}
             y2={pY(a, outerR)}
-            stroke={lat === 0 ? "#bdbdbd" : "#e0e0e0"}
+            stroke={lat === 0 ? "rgba(148,163,184,0.35)" : "rgba(148,163,184,0.15)"}
             strokeWidth={lat === 0 ? 1 : 0.5}
             strokeDasharray={lat === 0 ? undefined : "3,3"}
           />
@@ -264,7 +264,7 @@ export default function CirculationCrossSection({
       <path
         d={tropopausePath}
         fill="none"
-        stroke="#9e9e9e"
+        stroke="rgba(148,163,184,0.35)"
         strokeWidth={0.5}
         strokeDasharray="6,4"
       />
@@ -272,7 +272,7 @@ export default function CirculationCrossSection({
         x={pX(latA(12), tropopauseRadius(12))}
         y={pY(latA(12), tropopauseRadius(12)) + 13}
         fontSize={9}
-        fill="#9e9e9e"
+        fill="#94a3b8"
         textAnchor="start"
       >
         対流圏界面
@@ -360,7 +360,7 @@ export default function CirculationCrossSection({
       <path
         d={`M ${cx - earthR} ${cy} ${svgArc(earthR, Math.PI, 0, 1)}`}
         fill="none"
-        stroke="#8d6e63"
+        stroke="#8d7b6e"
         strokeWidth={2}
       />
 
@@ -435,7 +435,7 @@ export default function CirculationCrossSection({
               y1={pY(a, outerR)}
               x2={pX(a, tickR)}
               y2={pY(a, tickR)}
-              stroke="#bbb"
+              stroke="rgba(148,163,184,0.25)"
               strokeWidth={1}
             />
             <text
@@ -444,7 +444,7 @@ export default function CirculationCrossSection({
               textAnchor={anchor}
               dominantBaseline="middle"
               fontSize={10}
-              fill="#999"
+              fill="#94a3b8"
             >
               {formatLat(lat)}
             </text>
@@ -458,7 +458,7 @@ export default function CirculationCrossSection({
         y={cy + 22}
         textAnchor="middle"
         fontSize={10}
-        fill="#bbb"
+        fill="#64748b"
       >
         南半球
       </text>
@@ -467,7 +467,7 @@ export default function CirculationCrossSection({
         y={cy + 22}
         textAnchor="middle"
         fontSize={10}
-        fill="#bbb"
+        fill="#64748b"
       >
         北半球
       </text>
@@ -476,7 +476,7 @@ export default function CirculationCrossSection({
       <path
         d={`M ${cx - outerR} ${cy} ${svgArc(outerR, Math.PI, 0, 1)}`}
         fill="none"
-        stroke="#e0e0e0"
+        stroke="rgba(148,163,184,0.12)"
         strokeWidth={0.5}
       />
       <line
@@ -484,7 +484,7 @@ export default function CirculationCrossSection({
         y1={cy}
         x2={cx + outerR + 5}
         y2={cy}
-        stroke="#e0e0e0"
+        stroke="rgba(148,163,184,0.12)"
         strokeWidth={0.5}
       />
     </svg>

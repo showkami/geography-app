@@ -19,27 +19,27 @@ a {
   text-decoration: none;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — dark theme */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #0c1222;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #94a3b8;
+  background: #334155;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #475569;
 }
 
-/* Selection color */
+/* Selection color — dark theme */
 ::selection {
-  background: rgba(29, 78, 216, 0.15);
-  color: #1e3a8a;
+  background: rgba(56, 189, 248, 0.25);
+  color: #e2e8f0;
 }

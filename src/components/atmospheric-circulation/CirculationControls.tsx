@@ -104,13 +104,13 @@ export default function CirculationControls({
               style={{
                 fontSize: 20,
                 fontWeight: 700,
-                color: "#1a1a1a",
+                color: "#e2e8f0",
                 lineHeight: 1.2,
               }}
             >
               {MONTH_NAMES_JA[month - 1]}
             </div>
-            <div style={{ fontSize: 10, color: "#999", marginTop: 2 }}>月（季節）</div>
+            <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>月（季節）</div>
           </CircularSlider>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Tooltip title={isPlaying ? "停止" : "季節を自動再生"}>
@@ -119,8 +119,8 @@ export default function CirculationControls({
                 color="primary"
                 size="small"
                 sx={{
-                  bgcolor: "primary.50",
-                  "&:hover": { bgcolor: "primary.100" },
+                  bgcolor: "rgba(56, 189, 248, 0.1)",
+                  "&:hover": { bgcolor: "rgba(56, 189, 248, 0.2)" },
                 }}
               >
                 {isPlaying ? (

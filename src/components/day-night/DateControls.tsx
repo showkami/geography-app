@@ -136,13 +136,13 @@ export default function DateControls({
               style={{
                 fontSize: 18,
                 fontWeight: 700,
-                color: "#1a1a1a",
+                color: "#e2e8f0",
                 lineHeight: 1.2,
               }}
             >
               {dateLabel}
             </div>
-            <div style={{ fontSize: 10, color: "#999", marginTop: 2 }}>
+            <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>
               Day {dayOfYear}
             </div>
           </CircularSlider>
@@ -160,8 +160,8 @@ export default function DateControls({
                 color="primary"
                 size="small"
                 sx={{
-                  bgcolor: "primary.50",
-                  "&:hover": { bgcolor: "primary.100" },
+                  bgcolor: "rgba(56, 189, 248, 0.1)",
+                  "&:hover": { bgcolor: "rgba(56, 189, 248, 0.2)" },
                 }}
               >
                 {isPlaying ? (
@@ -211,13 +211,13 @@ export default function DateControls({
               style={{
                 fontSize: 20,
                 fontWeight: 700,
-                color: "#1a1a1a",
+                color: "#e2e8f0",
                 lineHeight: 1.2,
               }}
             >
               {formatTime(hourUTC)}
             </div>
-            <div style={{ fontSize: 10, color: "#999", marginTop: 2 }}>
+            <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>
               UTC
             </div>
           </CircularSlider>

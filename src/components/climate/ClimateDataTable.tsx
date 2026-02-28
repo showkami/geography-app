@@ -76,7 +76,7 @@ export default function ClimateDataTable({ cities }: ClimateDataTableProps) {
                 {m.replace("月", "")}
               </TableCell>
             ))}
-            <TableCell align="right" sx={{ fontWeight: 700, borderLeft: "1px solid #eee" }}>
+            <TableCell align="right" sx={{ fontWeight: 700, borderLeft: "1px solid rgba(148, 163, 184, 0.15)" }}>
               年
             </TableCell>
           </TableRow>
@@ -89,7 +89,7 @@ export default function ClimateDataTable({ cities }: ClimateDataTableProps) {
                 {t.toFixed(1)}
               </TableCell>
             ))}
-            <TableCell align="right" sx={{ fontWeight: 600, borderLeft: "1px solid #eee" }}>
+            <TableCell align="right" sx={{ fontWeight: 600, borderLeft: "1px solid rgba(148, 163, 184, 0.15)" }}>
               {Tann.toFixed(1)}
             </TableCell>
           </TableRow>
@@ -100,7 +100,7 @@ export default function ClimateDataTable({ cities }: ClimateDataTableProps) {
                 {p.toFixed(0)}
               </TableCell>
             ))}
-            <TableCell align="right" sx={{ fontWeight: 600, borderLeft: "1px solid #eee" }}>
+            <TableCell align="right" sx={{ fontWeight: 600, borderLeft: "1px solid rgba(148, 163, 184, 0.15)" }}>
               {Pann.toFixed(0)}
             </TableCell>
           </TableRow>

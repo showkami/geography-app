@@ -60,10 +60,12 @@ export default function ZoomableChartCard({
             display: "flex",
             justifyContent: "center",
             cursor: "pointer",
-            borderRadius: 1,
-            transition: "box-shadow 0.2s",
+            borderRadius: 2,
+            bgcolor: "#f8fafc",
+            p: 1,
+            transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
             "&:hover": {
-              boxShadow: "0 0 0 2px rgba(29,78,216,0.3)",
+              boxShadow: "0 0 0 2px rgba(56,189,248,0.3)",
             },
           }}
           onClick={() => setOpen(true)}
@@ -99,7 +101,9 @@ export default function ZoomableChartCard({
           </Typography>
         )}
         <DialogContent sx={{ p: 0, display: "flex", justifyContent: "center", overflow: "auto" }}>
-          {renderChart(dialogSize.width, dialogSize.height)}
+          <Box sx={{ bgcolor: "#f8fafc", borderRadius: 2, p: 1 }}>
+            {renderChart(dialogSize.width, dialogSize.height)}
+          </Box>
         </DialogContent>
       </Dialog>
     </>

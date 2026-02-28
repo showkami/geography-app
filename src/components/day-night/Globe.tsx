@@ -78,8 +78,8 @@ export default function Globe({
         .attr("cx", width / 2)
         .attr("cy", height / 2)
         .attr("r", projection.scale())
-        .attr("fill", "#e3f2fd")
-        .attr("stroke", "#90caf9")
+        .attr("fill", "#152238")
+        .attr("stroke", "rgba(56, 189, 248, 0.2)")
         .attr("stroke-width", 1.5);
 
       // グラティキュール（経緯線）
@@ -89,7 +89,7 @@ export default function Globe({
         .datum(graticule())
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#bbdefb")
+        .attr("stroke", "rgba(148, 163, 184, 0.12)")
         .attr("stroke-width", 0.4);
 
       // 陸地
@@ -97,8 +97,8 @@ export default function Globe({
         .append("path")
         .datum(land)
         .attr("d", path)
-        .attr("fill", "#81c784")
-        .attr("stroke", "#388e3c")
+        .attr("fill", "#2d5a3e")
+        .attr("stroke", "#4a8a5e")
         .attr("stroke-width", 0.5);
 
       // 昼夜境界線（ターミネーター）
@@ -187,7 +187,7 @@ export default function Globe({
         .attr("cy", height / 2)
         .attr("r", projection.scale())
         .attr("fill", "none")
-        .attr("stroke", "#455a64")
+        .attr("stroke", "rgba(148, 163, 184, 0.25)")
         .attr("stroke-width", 1.5);
     },
     [width, height]

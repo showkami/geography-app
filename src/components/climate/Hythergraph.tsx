@@ -379,7 +379,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
   }, [cities, allPoints]);
 
   return (
-    <Box sx={{ position: "relative" }}>
+    <Box sx={{ position: "relative", bgcolor: "#f8fafc", borderRadius: 2, p: 1 }}>
       <svg
         ref={svgRef}
         style={{ width: "100%", height: "auto", maxHeight: 500 }}

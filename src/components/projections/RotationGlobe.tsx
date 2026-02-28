@@ -78,8 +78,8 @@ export default function RotationGlobe({
         .attr("cx", cx)
         .attr("cy", cy)
         .attr("r", r)
-        .attr("fill", "#f5f7fa")
-        .attr("stroke", "#ccc")
+        .attr("fill", "#1a2744")
+        .attr("stroke", "rgba(148, 163, 184, 0.2)")
         .attr("stroke-width", 1);
 
       // === グラティキュール ===
@@ -89,7 +89,7 @@ export default function RotationGlobe({
         .datum(graticule())
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#e0e0e0")
+        .attr("stroke", "rgba(148, 163, 184, 0.15)")
         .attr("stroke-width", 0.4);
 
       // === 陸地（薄い色） ===
@@ -97,8 +97,8 @@ export default function RotationGlobe({
         .append("path")
         .datum(land)
         .attr("d", path)
-        .attr("fill", "#d4ddd0")
-        .attr("stroke", "#aaa")
+        .attr("fill", "#2d4a3e")
+        .attr("stroke", "#4a7a5e")
         .attr("stroke-width", 0.3);
 
       // === 地理的赤道（参照線、細い灰色） ===
@@ -113,7 +113,7 @@ export default function RotationGlobe({
         } as d3.GeoPermissibleObjects)
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "#999")
+        .attr("stroke", "rgba(148, 163, 184, 0.35)")
         .attr("stroke-width", 0.8)
         .attr("stroke-dasharray", "2,2");
 
@@ -228,7 +228,7 @@ export default function RotationGlobe({
         .attr("cy", cy)
         .attr("r", r)
         .attr("fill", "none")
-        .attr("stroke", "#666")
+        .attr("stroke", "rgba(148, 163, 184, 0.3)")
         .attr("stroke-width", 1.5);
     },
     [size]

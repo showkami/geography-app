@@ -4,38 +4,39 @@ import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
   palette: {
+    mode: "dark",
     primary: {
-      main: "#1d4ed8",
-      light: "#60a5fa",
-      dark: "#1e3a8a",
-      contrastText: "#ffffff",
+      main: "#38bdf8",
+      light: "#7dd3fc",
+      dark: "#0284c7",
+      contrastText: "#0c1222",
     },
     secondary: {
-      main: "#7c3aed",
-      light: "#a78bfa",
-      dark: "#5b21b6",
-      contrastText: "#ffffff",
+      main: "#c084fc",
+      light: "#d8b4fe",
+      dark: "#7c3aed",
+      contrastText: "#0c1222",
     },
     background: {
-      default: "#f8fafc",
-      paper: "#ffffff",
+      default: "#0c1222",
+      paper: "#151d30",
     },
     text: {
-      primary: "#0f172a",
-      secondary: "#475569",
+      primary: "#e2e8f0",
+      secondary: "#94a3b8",
     },
-    divider: "rgba(226, 232, 240, 0.8)",
+    divider: "rgba(148, 163, 184, 0.12)",
     success: {
-      main: "#059669",
+      main: "#34d399",
     },
     warning: {
-      main: "#d97706",
+      main: "#fbbf24",
     },
     info: {
-      main: "#0891b2",
+      main: "#22d3ee",
     },
     error: {
-      main: "#dc2626",
+      main: "#f87171",
     },
   },
   shape: {
@@ -43,8 +44,8 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: [
-      '"Noto Sans JP"',
-      '"Inter"',
+      '"Outfit"',
+      '"M PLUS 1"',
       "-apple-system",
       "BlinkMacSystemFont",
       '"Segoe UI"',
@@ -86,7 +87,7 @@ const theme = createTheme({
     },
     caption: {
       lineHeight: 1.5,
-      color: "#64748b",
+      color: "#94a3b8",
     },
     button: {
       fontWeight: 600,
@@ -104,10 +105,10 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: "rgba(255, 255, 255, 0.85)",
-          backdropFilter: "blur(16px)",
-          borderBottom: "1px solid rgba(226, 232, 240, 0.8)",
-          color: "#0f172a",
+          background: "rgba(12, 18, 34, 0.8)",
+          backdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(148, 163, 184, 0.08)",
+          color: "#e2e8f0",
         },
       },
       defaultProps: {
@@ -119,21 +120,23 @@ const theme = createTheme({
         root: {
           borderRadius: 16,
           backgroundImage: "none",
+          backgroundColor: "rgba(21, 29, 48, 0.7)",
+          backdropFilter: "blur(12px)",
         },
         elevation1: {
           boxShadow:
-            "0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
-          border: "1px solid rgba(226, 232, 240, 0.8)",
+            "0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.15)",
+          border: "1px solid rgba(148, 163, 184, 0.08)",
         },
         elevation2: {
           boxShadow:
-            "0 1px 3px 0 rgb(0 0 0 / 0.08), 0 2px 8px -2px rgb(0 0 0 / 0.06)",
-          border: "1px solid rgba(226, 232, 240, 0.8)",
+            "0 2px 8px -2px rgb(0 0 0 / 0.3), 0 1px 3px 0 rgb(0 0 0 / 0.2)",
+          border: "1px solid rgba(148, 163, 184, 0.08)",
         },
         elevation3: {
           boxShadow:
-            "0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04)",
-          border: "1px solid rgba(226, 232, 240, 0.6)",
+            "0 4px 12px -2px rgb(0 0 0 / 0.35), 0 2px 4px -2px rgb(0 0 0 / 0.15)",
+          border: "1px solid rgba(148, 163, 184, 0.06)",
         },
       },
     },
@@ -142,13 +145,15 @@ const theme = createTheme({
         root: {
           borderRadius: 16,
           backgroundImage: "none",
-          border: "1px solid rgba(226, 232, 240, 0.8)",
+          backgroundColor: "rgba(21, 29, 48, 0.7)",
+          border: "1px solid rgba(148, 163, 184, 0.08)",
           boxShadow:
-            "0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04)",
+            "0 1px 3px 0 rgb(0 0 0 / 0.2), 0 1px 2px -1px rgb(0 0 0 / 0.15)",
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:hover": {
             boxShadow:
-              "0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.06)",
+              "0 20px 25px -5px rgb(0 0 0 / 0.25), 0 8px 10px -6px rgb(0 0 0 / 0.2)",
+            borderColor: "rgba(56, 189, 248, 0.15)",
           },
         },
       },
@@ -167,17 +172,19 @@ const theme = createTheme({
         },
         contained: {
           boxShadow:
-            "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+            "0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2)",
           "&:hover": {
             boxShadow:
-              "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+              "0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2)",
             transform: "translateY(-1px)",
           },
         },
         outlined: {
           borderWidth: "1.5px",
+          borderColor: "rgba(148, 163, 184, 0.2)",
           "&:hover": {
             borderWidth: "1.5px",
+            borderColor: "rgba(56, 189, 248, 0.4)",
           },
         },
       },
@@ -213,7 +220,7 @@ const theme = createTheme({
           width: 18,
           height: 18,
           "&:hover, &.Mui-focusVisible": {
-            boxShadow: "0 0 0 8px rgba(29, 78, 216, 0.16)",
+            boxShadow: "0 0 0 8px rgba(56, 189, 248, 0.16)",
           },
         },
       },
@@ -230,6 +237,41 @@ const theme = createTheme({
         tooltip: {
           borderRadius: 8,
           fontSize: "0.8rem",
+          backgroundColor: "rgba(15, 23, 42, 0.95)",
+          border: "1px solid rgba(148, 163, 184, 0.12)",
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#151d30",
+          backgroundImage: "none",
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        indicator: {
+          height: 3,
+          borderRadius: "3px 3px 0 0",
+          background: "linear-gradient(90deg, #38bdf8, #7dd3fc)",
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          "&.Mui-selected": {
+            color: "#38bdf8",
+          },
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          borderColor: "rgba(148, 163, 184, 0.12)",
         },
       },
     },
