@@ -149,13 +149,43 @@ export default function WindPatternGlobe({
         nhSubpolarLat, shSubpolarLat,
       } = getCellBoundaries(doy);
 
+      // Defs for gradients
+      const defs = svg.append("defs");
+
+      // Sphere shading gradient (3D depth)
+      const sphereGrad = defs.append("radialGradient")
+        .attr("id", "globe-sphere-shading")
+        .attr("cx", "38%")
+        .attr("cy", "32%");
+      sphereGrad.append("stop").attr("offset", "0%").attr("stop-color", "rgba(120,160,200,0.10)");
+      sphereGrad.append("stop").attr("offset", "55%").attr("stop-color", "rgba(40,80,130,0.02)");
+      sphereGrad.append("stop").attr("offset", "100%").attr("stop-color", "rgba(0,0,15,0.18)");
+
+      // Atmosphere glow
+      const glowGrad = defs.append("radialGradient")
+        .attr("id", "globe-atmo-glow")
+        .attr("cx", "50%")
+        .attr("cy", "50%");
+      glowGrad.append("stop").attr("offset", "88%").attr("stop-color", "rgba(100,160,220,0)");
+      glowGrad.append("stop").attr("offset", "96%").attr("stop-color", "rgba(100,160,220,0.08)");
+      glowGrad.append("stop").attr("offset", "100%").attr("stop-color", "rgba(100,160,220,0.02)");
+
+      // Atmosphere glow circle (behind globe)
+      svg
+        .append("circle")
+        .attr("cx", width / 2)
+        .attr("cy", height / 2)
+        .attr("r", projection.scale()! * 1.04)
+        .attr("fill", "url(#globe-atmo-glow)")
+        .attr("stroke", "none");
+
       // Ocean
       svg
         .append("circle")
         .attr("cx", width / 2)
         .attr("cy", height / 2)
         .attr("r", projection.scale()!)
-        .attr("fill", "#152238")
+        .attr("fill", "#162d4a")
         .attr("stroke", "none");
 
       // Graticule (subtle)
@@ -164,24 +194,25 @@ export default function WindPatternGlobe({
         .datum(d3.geoGraticule().step([30, 30])())
         .attr("d", path)
         .attr("fill", "none")
-        .attr("stroke", "rgba(148, 163, 184, 0.12)")
+        .attr("stroke", "rgba(148, 163, 184, 0.10)")
         .attr("stroke-width", 0.3);
 
-      // Pressure zone bands
+      // Pressure zone bands — subtle, narrow, harmonious colors
+      // Low pressure: coral/warm tones, High pressure: amber/cool tones
       if (props.showPressureZones) {
-        const bandWidth = 8;
+        const bandWidth = 5;
         const bands = [
-          // ITCZ (low pressure)
-          { lat1: itczLat - bandWidth, lat2: itczLat + bandWidth, color: PRESSURE_ZONES[0].color, op: 0.22 },
-          // Subtropical highs
-          { lat1: nhSubtropicalLat - bandWidth, lat2: nhSubtropicalLat + bandWidth, color: PRESSURE_ZONES[1].color, op: 0.18 },
-          { lat1: shSubtropicalLat - bandWidth, lat2: shSubtropicalLat + bandWidth, color: PRESSURE_ZONES[1].color, op: 0.18 },
-          // Subpolar lows
-          { lat1: nhSubpolarLat - bandWidth, lat2: nhSubpolarLat + bandWidth, color: PRESSURE_ZONES[2].color, op: 0.18 },
-          { lat1: shSubpolarLat - bandWidth, lat2: shSubpolarLat + bandWidth, color: PRESSURE_ZONES[2].color, op: 0.18 },
-          // Polar highs
-          { lat1: 75, lat2: 90, color: PRESSURE_ZONES[3].color, op: 0.18 },
-          { lat1: -90, lat2: -75, color: PRESSURE_ZONES[3].color, op: 0.18 },
+          // ITCZ (low pressure) — warm coral
+          { lat1: itczLat - bandWidth, lat2: itczLat + bandWidth, color: "#ff8a65", op: 0.12 },
+          // Subtropical highs — amber
+          { lat1: nhSubtropicalLat - bandWidth, lat2: nhSubtropicalLat + bandWidth, color: "#ffd54f", op: 0.09 },
+          { lat1: shSubtropicalLat - bandWidth, lat2: shSubtropicalLat + bandWidth, color: "#ffd54f", op: 0.09 },
+          // Subpolar lows — sky blue
+          { lat1: nhSubpolarLat - bandWidth, lat2: nhSubpolarLat + bandWidth, color: "#4fc3f7", op: 0.09 },
+          { lat1: shSubpolarLat - bandWidth, lat2: shSubpolarLat + bandWidth, color: "#4fc3f7", op: 0.09 },
+          // Polar highs — ice blue-grey
+          { lat1: 78, lat2: 90, color: "#b0bec5", op: 0.10 },
+          { lat1: -90, lat2: -78, color: "#b0bec5", op: 0.10 },
         ];
         bands.forEach((b) => {
           svg
@@ -195,10 +226,10 @@ export default function WindPatternGlobe({
 
         // Boundary lines at pressure zone latitudes
         const boundaryLines = [
-          { lat: nhSubtropicalLat, color: PRESSURE_ZONES[1].color, label: "亜熱帯高圧帯" },
-          { lat: shSubtropicalLat, color: PRESSURE_ZONES[1].color, label: "" },
-          { lat: nhSubpolarLat, color: PRESSURE_ZONES[2].color, label: "亜極低圧帯" },
-          { lat: shSubpolarLat, color: PRESSURE_ZONES[2].color, label: "" },
+          { lat: nhSubtropicalLat, color: "#ffd54f" },
+          { lat: shSubtropicalLat, color: "#ffd54f" },
+          { lat: nhSubpolarLat, color: "#4fc3f7" },
+          { lat: shSubpolarLat, color: "#4fc3f7" },
         ];
         boundaryLines.forEach((bl) => {
           svg
@@ -207,9 +238,9 @@ export default function WindPatternGlobe({
             .attr("d", path)
             .attr("fill", "none")
             .attr("stroke", bl.color)
-            .attr("stroke-width", 1.0)
-            .attr("stroke-dasharray", "3,4")
-            .attr("opacity", 0.5);
+            .attr("stroke-width", 0.6)
+            .attr("stroke-dasharray", "3,5")
+            .attr("opacity", 0.35);
         });
       }
 
@@ -218,10 +249,10 @@ export default function WindPatternGlobe({
         .append("path")
         .datum(land)
         .attr("d", path)
-        .attr("fill", "#2d5a3e")
-        .attr("stroke", "#4a8a5e")
-        .attr("stroke-width", 0.5)
-        .attr("opacity", 0.85);
+        .attr("fill", "#2a6b48")
+        .attr("stroke", "#4a9a6a")
+        .attr("stroke-width", 0.4)
+        .attr("opacity", 0.88);
 
       // Equator
       svg
@@ -245,10 +276,17 @@ export default function WindPatternGlobe({
         .attr("stroke-width", 2.5)
         .attr("stroke-dasharray", "6,3");
 
+      // Sphere shading overlay (3D depth)
+      svg
+        .append("circle")
+        .attr("cx", width / 2)
+        .attr("cy", height / 2)
+        .attr("r", projection.scale()!)
+        .attr("fill", "url(#globe-sphere-shading)")
+        .attr("stroke", "none");
+
       // Wind arrows
       if (props.showWindArrows) {
-        const defs = svg.append("defs");
-
         CELLS.forEach((cell) => {
           defs
             .append("marker")
@@ -303,13 +341,13 @@ export default function WindPatternGlobe({
       if (props.showPressureZones) {
         const labelLon = -projection.rotate()[0];
         const labelData: { lat: number; text: string; color: string; bold?: boolean }[] = [
-          { lat: itczLat, text: "ITCZ", color: "#c62828", bold: true },
-          { lat: nhSubtropicalLat, text: "高", color: "#e65100" },
-          { lat: shSubtropicalLat, text: "高", color: "#e65100" },
-          { lat: nhSubpolarLat, text: "低", color: "#1565c0" },
-          { lat: shSubpolarLat, text: "低", color: "#1565c0" },
-          { lat: 85, text: "高", color: "#7b1fa2" },
-          { lat: -85, text: "高", color: "#7b1fa2" },
+          { lat: itczLat, text: "ITCZ", color: "#ffab91", bold: true },
+          { lat: nhSubtropicalLat, text: "高", color: "#ffe082" },
+          { lat: shSubtropicalLat, text: "高", color: "#ffe082" },
+          { lat: nhSubpolarLat, text: "低", color: "#81d4fa" },
+          { lat: shSubpolarLat, text: "低", color: "#81d4fa" },
+          { lat: 85, text: "高", color: "#cfd8dc" },
+          { lat: -85, text: "高", color: "#cfd8dc" },
         ];
 
         labelData.forEach((ld) => {
@@ -329,8 +367,8 @@ export default function WindPatternGlobe({
             .attr("font-size", ld.bold ? 12 : 10)
             .attr("font-weight", ld.bold ? 700 : 600)
             .attr("fill", ld.color)
-            .attr("stroke", "rgba(12, 18, 34, 0.7)")
-            .attr("stroke-width", 2.5)
+            .attr("stroke", "rgba(10, 20, 40, 0.75)")
+            .attr("stroke-width", 2.8)
             .attr("paint-order", "stroke")
             .text(ld.text);
         });
