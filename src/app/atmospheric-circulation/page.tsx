@@ -5,7 +5,6 @@ import { Container, Grid, Paper, Typography, Box } from "@mui/material";
 import CirculationCrossSection from "@/components/atmospheric-circulation/CirculationCrossSection";
 import WindPatternGlobe from "@/components/atmospheric-circulation/WindPatternGlobe";
 import CirculationControls from "@/components/atmospheric-circulation/CirculationControls";
-import CellInfoCard from "@/components/atmospheric-circulation/CellInfoCard";
 import { CELLS, type CellId, type TopicId } from "@/lib/atmospheric";
 
 export default function AtmosphericCirculationPage() {
@@ -179,8 +178,8 @@ export default function AtmosphericCirculationPage() {
                   sx={{
                     width: 12,
                     height: 8,
-                    bgcolor: "#ef535035",
-                    border: "1px solid #ef535060",
+                    bgcolor: "rgba(255,138,101,0.25)",
+                    border: "1px solid rgba(255,138,101,0.5)",
                     borderRadius: 0.3,
                   }}
                 />
@@ -191,8 +190,8 @@ export default function AtmosphericCirculationPage() {
                   sx={{
                     width: 12,
                     height: 8,
-                    bgcolor: "#ff980030",
-                    border: "1px solid #ff980060",
+                    bgcolor: "rgba(255,213,79,0.25)",
+                    border: "1px solid rgba(255,213,79,0.5)",
                     borderRadius: 0.3,
                   }}
                 />
@@ -219,12 +218,6 @@ export default function AtmosphericCirculationPage() {
           </Paper>
         </Grid>
 
-        {/* Info card */}
-        <Grid size={{ xs: 12, md: 7 }}>
-          <Paper elevation={2} sx={{ minHeight: 300 }}>
-            <CellInfoCard selectedTopic={selectedTopic} />
-          </Paper>
-        </Grid>
       </Grid>
     </Container>
   );
