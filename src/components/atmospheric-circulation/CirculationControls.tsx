@@ -5,7 +5,6 @@ import {
   Box,
   Typography,
   IconButton,
-  Chip,
   Tooltip,
   Switch,
   FormControlLabel,
@@ -13,7 +12,7 @@ import {
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { CELLS, MONTH_NAMES_JA, type CellId, type TopicId } from "@/lib/atmospheric";
+import { MONTH_NAMES_JA } from "@/lib/atmospheric";
 import CircularSlider from "@/components/common/CircularSlider";
 
 interface CirculationControlsProps {
@@ -22,8 +21,6 @@ interface CirculationControlsProps {
   isPlaying: boolean;
   onPlayToggle: () => void;
   onReset: () => void;
-  selectedTopic: TopicId | null;
-  onTopicChange: (topic: TopicId | null) => void;
   showCells: boolean;
   onShowCellsChange: (show: boolean) => void;
   showPressureZones: boolean;
@@ -39,20 +36,12 @@ const SEASON_QUADRANT_MARKS = [
   { value: 10, label: "秋分" },
 ];
 
-const TOPIC_CHIPS: { id: TopicId; label: string; color: string }[] = [
-  ...CELLS.map((c) => ({ id: c.id as TopicId, label: c.name, color: c.color })),
-  { id: "coriolis", label: "コリオリの力", color: "#26a69a" },
-  { id: "itcz_migration", label: "ITCZの季節移動", color: "#ff7043" },
-];
-
 export default function CirculationControls({
   month,
   onMonthChange,
   isPlaying,
   onPlayToggle,
   onReset,
-  selectedTopic,
-  onTopicChange,
   showCells,
   onShowCellsChange,
   showPressureZones,
@@ -60,10 +49,6 @@ export default function CirculationControls({
   showWindArrows,
   onShowWindArrowsChange,
 }: CirculationControlsProps) {
-  const handleTopicClick = (topicId: TopicId) => {
-    onTopicChange(selectedTopic === topicId ? null : topicId);
-  };
-
   return (
     <Box sx={{ p: 2 }}>
       {/* Month slider */}
@@ -197,54 +182,6 @@ export default function CirculationControls({
         </Box>
       </Box>
 
-      {/* Topic selection */}
-      <Box
-        sx={{
-          pt: 1.5,
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Typography
-          variant="subtitle2"
-          color="text.secondary"
-          sx={{ mb: 1 }}
-        >
-          トピック選択
-        </Typography>
-        <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-          {TOPIC_CHIPS.map((topic) => {
-            const isSelected = selectedTopic === topic.id;
-            return (
-              <Chip
-                key={topic.id}
-                label={topic.label}
-                size="small"
-                variant={isSelected ? "filled" : "outlined"}
-                onClick={() => handleTopicClick(topic.id)}
-                sx={{
-                  cursor: "pointer",
-                  fontSize: "0.75rem",
-                  fontWeight: isSelected ? 600 : 400,
-                  bgcolor: isSelected ? `${topic.color}18` : undefined,
-                  color: isSelected ? topic.color : "text.secondary",
-                  borderColor: isSelected ? topic.color : undefined,
-                  "&:hover": {
-                    bgcolor: `${topic.color}12`,
-                  },
-                }}
-              />
-            );
-          })}
-        </Box>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ mt: 0.5, display: "block", fontSize: "0.7rem" }}
-        >
-          クリックで選択・解除。選択中は該当セルがハイライトされます
-        </Typography>
-      </Box>
     </Box>
   );
 }

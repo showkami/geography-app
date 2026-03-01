@@ -10,7 +10,6 @@ import { solarDeclination } from "./solar";
 export type CellId = "hadley" | "ferrel" | "polar";
 export type PressureZoneId = "itcz" | "subtropical_high" | "subpolar_low" | "polar_high";
 export type WindZoneId = "trade" | "westerly" | "polar_easterly";
-export type TopicId = CellId | "coriolis" | "itcz_migration";
 
 export interface CellDefinition {
   id: CellId;

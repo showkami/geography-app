@@ -5,22 +5,15 @@ import { Container, Grid, Paper, Typography, Box } from "@mui/material";
 import CirculationCrossSection from "@/components/atmospheric-circulation/CirculationCrossSection";
 import WindPatternGlobe from "@/components/atmospheric-circulation/WindPatternGlobe";
 import CirculationControls from "@/components/atmospheric-circulation/CirculationControls";
-import { CELLS, type CellId, type TopicId } from "@/lib/atmospheric";
+import { CELLS, type CellId } from "@/lib/atmospheric";
 
 export default function AtmosphericCirculationPage() {
   const [month, setMonth] = useState(7);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState<TopicId | null>(null);
   const [showCells, setShowCells] = useState(true);
   const [showPressureZones, setShowPressureZones] = useState(true);
   const [showWindArrows, setShowWindArrows] = useState(true);
   const animRef = useRef<NodeJS.Timeout | null>(null);
-
-  const highlightedCell: CellId | null =
-    selectedTopic &&
-    CELLS.some((c) => c.id === selectedTopic)
-      ? (selectedTopic as CellId)
-      : null;
 
   const handlePlayToggle = useCallback(() => {
     setIsPlaying((prev) => !prev);
@@ -56,7 +49,7 @@ export default function AtmosphericCirculationPage() {
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <CirculationCrossSection
                 month={month}
-                highlightedCell={highlightedCell}
+                highlightedCell={null}
                 showPressureZones={showPressureZones}
                 showWindArrows={showWindArrows}
                 showCells={showCells}
@@ -114,8 +107,6 @@ export default function AtmosphericCirculationPage() {
               isPlaying={isPlaying}
               onPlayToggle={handlePlayToggle}
               onReset={handleReset}
-              selectedTopic={selectedTopic}
-              onTopicChange={setSelectedTopic}
               showCells={showCells}
               onShowCellsChange={setShowCells}
               showPressureZones={showPressureZones}
@@ -135,7 +126,7 @@ export default function AtmosphericCirculationPage() {
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <WindPatternGlobe
                 month={month}
-                highlightedCell={highlightedCell}
+                highlightedCell={null}
                 showPressureZones={showPressureZones}
                 showWindArrows={showWindArrows}
                 width={400}
