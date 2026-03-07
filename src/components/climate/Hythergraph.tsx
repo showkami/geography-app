@@ -68,7 +68,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       return;
     }
 
-    // スケール（選択中の都市データに合わせる）
+    // スケール（選択中の都市データに合わせる）— X:降水量, Y:気温
     const tExtent = d3.extent(allPoints, (d) => d.t) as [number, number];
     const pExtent = d3.extent(allPoints, (d) => d.p) as [number, number];
     const tRange = tExtent[1] - tExtent[0];
@@ -76,52 +76,53 @@ export default function Hythergraph({ cities }: HythergraphProps) {
     const tPad = Math.max(2, tRange * 0.15);
     const pPad = Math.max(10, pRange * 0.15);
 
-    const xMin = tExtent[0] - tPad;
-    const xMax = tExtent[1] + tPad;
-    const yMax = pExtent[1] + pPad;
+    const yMin = tExtent[0] - tPad;
+    const yMax = tExtent[1] + tPad;
+    const xMax = pExtent[1] + pPad;
 
-    const x = d3.scaleLinear().domain([xMin, xMax]).range([0, innerW]);
-    const y = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
+    const x = d3.scaleLinear().domain([0, xMax]).range([0, innerW]);
+    const y = d3.scaleLinear().domain([yMin, yMax]).range([innerH, 0]);
 
     const g = svg.append("g").attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
 
-    // 背景ゾーン
+    // 背景ゾーン（気温が縦軸なので水平バンド）
     for (const zone of ZONE_BANDS) {
-      const zoneLeft = Math.max(x(zone.min === -Infinity ? xMin : zone.min), 0);
-      const zoneRight = Math.min(x(zone.max === Infinity ? xMax : zone.max), innerW);
-      if (zoneRight > zoneLeft) {
+      const zoneTop = Math.max(y(zone.max === Infinity ? yMax : zone.max), 0);
+      const zoneBottom = Math.min(y(zone.min === -Infinity ? yMin : zone.min), innerH);
+      if (zoneBottom > zoneTop) {
         g.append("rect")
-          .attr("x", zoneLeft)
-          .attr("y", 0)
-          .attr("width", zoneRight - zoneLeft)
-          .attr("height", innerH)
+          .attr("x", 0)
+          .attr("y", zoneTop)
+          .attr("width", innerW)
+          .attr("height", zoneBottom - zoneTop)
           .attr("fill", zone.color);
 
         g.append("text")
-          .attr("x", (zoneLeft + zoneRight) / 2)
-          .attr("y", 12)
-          .attr("text-anchor", "middle")
+          .attr("x", innerW - 4)
+          .attr("y", (zoneTop + zoneBottom) / 2)
+          .attr("text-anchor", "end")
+          .attr("dominant-baseline", "middle")
           .attr("fill", "rgba(148,163,184,0.5)")
           .attr("font-size", 10)
           .text(zone.label);
       }
     }
 
-    // 閾値線（気温）
+    // 閾値線（気温 → 水平線）
     for (const th of THRESHOLD_TEMPS) {
-      const xPos = x(th.value);
-      if (xPos >= 0 && xPos <= innerW) {
+      const yPos = y(th.value);
+      if (yPos >= 0 && yPos <= innerH) {
         g.append("line")
-          .attr("x1", xPos).attr("y1", 0)
-          .attr("x2", xPos).attr("y2", innerH)
+          .attr("x1", 0).attr("y1", yPos)
+          .attr("x2", innerW).attr("y2", yPos)
           .attr("stroke", th.color)
           .attr("stroke-width", 1)
           .attr("stroke-dasharray", "4,3")
           .attr("opacity", 0.4);
         // ホバー用の透明な太線
         g.append("line")
-          .attr("x1", xPos).attr("y1", 0)
-          .attr("x2", xPos).attr("y2", innerH)
+          .attr("x1", 0).attr("y1", yPos)
+          .attr("x2", innerW).attr("y2", yPos)
           .attr("stroke", "transparent")
           .attr("stroke-width", 12)
           .style("cursor", "pointer")
@@ -141,21 +142,21 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       }
     }
 
-    // 60mm 降水閾値線
+    // 60mm 降水閾値線（降水量が横軸なので垂直線）
     const precipTip60 = "月降水量 60mm\n熱帯雨林気候(Af)の判定基準\n最少雨月が60mm以上なら熱帯雨林気候";
-    const y60 = y(60);
-    if (y60 >= 0 && y60 <= innerH) {
+    const x60 = x(60);
+    if (x60 >= 0 && x60 <= innerW) {
       g.append("line")
-        .attr("x1", 0).attr("y1", y60)
-        .attr("x2", innerW).attr("y2", y60)
+        .attr("x1", x60).attr("y1", 0)
+        .attr("x2", x60).attr("y2", innerH)
         .attr("stroke", "#22d3ee")
         .attr("stroke-width", 1)
         .attr("stroke-dasharray", "4,3")
         .attr("opacity", 0.4);
       // ホバー用透明太線
       g.append("line")
-        .attr("x1", 0).attr("y1", y60)
-        .attr("x2", innerW).attr("y2", y60)
+        .attr("x1", x60).attr("y1", 0)
+        .attr("x2", x60).attr("y2", innerH)
         .attr("stroke", "transparent")
         .attr("stroke-width", 12)
         .style("cursor", "pointer")
@@ -189,14 +190,14 @@ export default function Hythergraph({ cities }: HythergraphProps) {
     ];
 
     for (const al of aridLines) {
-      const x0 = xMin, x1 = xMax;
-      const py0 = al.slope * x0 + al.intercept;
-      const py1 = al.slope * x1 + al.intercept;
-      // 描画範囲内にクリップ
-      if (py1 >= 0) {
+      // P = slope * T + intercept → X=降水量, Y=気温
+      const t0 = yMin, t1 = yMax;
+      const p0 = al.slope * t0 + al.intercept;
+      const p1 = al.slope * t1 + al.intercept;
+      if (p1 >= 0) {
         const lineData: [number, number][] = [
-          [Math.max(x(x0), 0), Math.min(y(py0), innerH)],
-          [Math.min(x(x1), innerW), Math.max(y(py1), 0)],
+          [Math.max(x(p0), 0), Math.min(y(t0), innerH)],
+          [Math.min(x(p1), innerW), Math.max(y(t1), 0)],
         ];
         g.append("line")
           .attr("x1", lineData[0][0]).attr("y1", lineData[0][1])
@@ -250,7 +251,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       .attr("text-anchor", "middle")
       .attr("fill", "#94a3b8")
       .attr("font-size", 12)
-      .text("月平均気温 (°C)");
+      .text("月降水量 (mm)");
 
     svg
       .append("text")
@@ -260,13 +261,13 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       .attr("text-anchor", "middle")
       .attr("fill", "#94a3b8")
       .attr("font-size", 12)
-      .text("月降水量 (mm)");
+      .text("月平均気温 (°C)");
 
     // 都市ごとのポリゴンを描画
     const lineGen = d3
       .line<{ t: number; p: number }>()
-      .x((d) => x(d.t))
-      .y((d) => y(d.p))
+      .x((d) => x(d.p))
+      .y((d) => y(d.t))
       .curve(d3.curveLinearClosed);
 
     cities.forEach((cd, ci) => {
@@ -290,8 +291,8 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       // 月ポイント
       points.forEach((pt, m) => {
         g.append("circle")
-          .attr("cx", x(pt.t))
-          .attr("cy", y(pt.p))
+          .attr("cx", x(pt.p))
+          .attr("cy", y(pt.t))
           .attr("r", 4)
           .attr("fill", cd.city.color)
           .attr("stroke", "rgba(12,18,34,0.6)")
@@ -327,12 +328,12 @@ export default function Hythergraph({ cities }: HythergraphProps) {
         // 月番号ラベル
         const labelOffset = 10;
         const angle = Math.atan2(
-          y(pt.p) - innerH / 2,
-          x(pt.t) - innerW / 2
+          y(pt.t) - innerH / 2,
+          x(pt.p) - innerW / 2
         );
         g.append("text")
-          .attr("x", x(pt.t) + Math.cos(angle) * labelOffset)
-          .attr("y", y(pt.p) + Math.sin(angle) * labelOffset)
+          .attr("x", x(pt.p) + Math.cos(angle) * labelOffset)
+          .attr("y", y(pt.t) + Math.sin(angle) * labelOffset)
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
           .attr("fill", cd.city.color)
@@ -351,7 +352,7 @@ export default function Hythergraph({ cities }: HythergraphProps) {
       const diamond = d3.symbol().type(d3.symbolDiamond).size(120);
       g.append("path")
         .attr("d", diamond()!)
-        .attr("transform", `translate(${x(Tann)},${y(PannPerMonth)})`)
+        .attr("transform", `translate(${x(PannPerMonth)},${y(Tann)})`)
         .attr("fill", cd.city.color)
         .attr("stroke", "rgba(12,18,34,0.6)")
         .attr("stroke-width", 2)
